@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 21: High-Dimensional Statistics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #667eea 50%, #764ba2 75%, #667eea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '∞📊🧮📈∞';
+            position: absolute;
+            top: 50%;
+            left: -30%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: high-dim-flow 18s linear infinite;
+        }
+
+        @keyframes high-dim-flow {
+            0% { left: -30%; }
+            100% { left: 130%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: dimension-expand 7s ease-in-out infinite;
+        }
+
+        @keyframes dimension-expand {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            50% { transform: scale(1.8) rotate(180deg); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highdim-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .highdim-box::before {
+            content: 'p≫n';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 3em;
+            opacity: 0.3;
+            font-style: italic;
+        }
+
+        .highdim-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '√(log p/n)';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5em;
+            opacity: 0.2;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .method-card h5 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .curse-demo {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            text-align: center;
+        }
+
+        .curse-demo h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .sparsity-demo {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #26a69a;
+            text-align: center;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .method-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 21: High-Dimensional Statistics</h1>
+            <p>When the Number of Parameters Exceeds the Sample Size</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🚀 The High-Dimensional Revolution</h2>
+                <p>Modern data often has more variables than observations (p > n). This breaks traditional statistical theory and requires new methods and thinking.</p>
+                
+                <div class="highdim-box">
+                    <h4>🎯 The High-Dimensional Setting</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        p ≫ n or p ≈ n
+                        <br><br>
+                        p = number of parameters/features
+                        <br>n = sample size
+                    </div>
+                    <p><strong>Traditional setting:</strong> p ≪ n (fixed p, n → ∞)</p>
+                    <p><strong>Modern setting:</strong> Both p and n grow, often p > n</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🧬 Modern Examples</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Application</th>
+                            <th>Sample Size (n)</th>
+                            <th>Features (p)</th>
+                            <th>Ratio p/n</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Genomics</strong></td>
+                            <td>100-1000 patients</td>
+                            <td>20,000+ genes</td>
+                            <td>20-200</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Neuroimaging</strong></td>
+                            <td>50-200 subjects</td>
+                            <td>100,000+ voxels</td>
+                            <td>500-2000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Text Analysis</strong></td>
+                            <td>1000s documents</td>
+                            <td>10,000+ words</td>
+                            <td>1-10</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Finance</strong></td>
+                            <td>250 days</td>
+                            <td>1000s stocks</td>
+                            <td>4-10</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="curse-demo">
+                    <h4>⚠️ Why Traditional Methods Fail</h4>
+                    <ul>
+                        <li><strong>Overfitting:</strong> Perfect fit to training data, poor generalization</li>
+                        <li><strong>Non-invertible matrices:</strong> (X'X)⁻¹ doesn't exist when p > n</li>
+                        <li><strong>Multiple testing:</strong> Many false discoveries</li>
+                        <li><strong>Curse of dimensionality:</strong> Distances become meaningless</li>
+                        <li><strong>Computational burden:</strong> Algorithms scale poorly</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Sparsity and Regularization</h2>
+
+                <div class="sparsity-demo">
+                    <h4>🎯 The Sparsity Principle</h4>
+                    <p><strong>Key assumption:</strong> Only a few variables are truly important</p>
+                    <div class="formula-box">
+                        ||β||₀ = |{j : βⱼ ≠ 0}| ≪ p
+                    </div>
+                    <p><strong>s-sparse:</strong> At most s non-zero coefficients</p>
+                    <p><strong>Makes high-dimensional problems tractable!</strong></p>
+                </div>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <h5>📏 Ridge Regression</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            β̂ᴿⁱᵈᵍᵉ = argmin ||Y - Xβ||² + λ||β||₂²
+                        </div>
+                        <p><strong>Effect:</strong> Shrinks all coefficients toward zero</p>
+                        <p><strong>Advantage:</strong> Always has solution, computationally stable</p>
+                        <p><strong>Limitation:</strong> Doesn't perform variable selection</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📐 Lasso Regression</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            β̂ᴸᵃˢˢᵒ = argmin ||Y - Xβ||² + λ||β||₁
+                        </div>
+                        <p><strong>Effect:</strong> Sets many coefficients exactly to zero</p>
+                        <p><strong>Advantage:</strong> Automatic variable selection</p>
+                        <p><strong>Breakthrough:</strong> Convex optimization for sparse solutions</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🎯 Elastic Net</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            β̂ᴱᴺ = argmin ||Y - Xβ||² + λ₁||β||₁ + λ₂||β||₂²
+                        </div>
+                        <p><strong>Combines:</strong> L1 penalty (sparsity) + L2 penalty (stability)</p>
+                        <p><strong>Advantage:</strong> Handles correlated predictors better than Lasso</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🔧 SCAD & MCP</h5>
+                        <p><strong>Non-convex penalties:</strong> Better theoretical properties</p>
+                        <p><strong>SCAD:</strong> Smoothly Clipped Absolute Deviation</p>
+                        <p><strong>MCP:</strong> Minimax Concave Penalty</p>
+                        <p><strong>Advantage:</strong> Oracle properties (as if we knew true model)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Oracle Inequalities</h2>
+
+                <div class="highdim-box">
+                    <h4>🎯 Finite Sample Theory</h4>
+                    <p><strong>Oracle inequality:</strong> Performance bound comparing estimator to ideal "oracle"</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        ||β̂ - β*||² ≤ C₁ · σ² · s log p/n + C₂ · min_β{||β - β*||² + λ||β||₁}
+                    </div>
+                    <p><strong>First term:</strong> Statistical error (unavoidable noise)</p>
+                    <p><strong>Second term:</strong> Approximation error (model misspecification)</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>📈 Lasso Theory</h4>
+                    <p><strong>Under restricted eigenvalue condition:</strong></p>
+                    <div class="formula-box">
+                        ||β̂ˡᵃˢˢᵒ - β*||² ≤ C · σ² · s log p/n
+                    </div>
+                    <p><strong>Key insights:</strong></p>
+                    <ul>
+                        <li>Error depends on sparsity s, not full dimension p</li>
+                        <li>log p factor: price paid for not knowing which variables matter</li>
+                        <li>Optimal rate: matches minimax lower bound</li>
+                        <li>Works even when p ≫ n if s is small</li>
+                    </ul>
+                </div>
+
+                <div class="sparsity-demo">
+                    <h4>🔍 Restricted Eigenvalue Condition</h4>
+                    <div class="formula-box">
+                        κ²(S) = min{||Xδ||²/n : δ ∈ C(S), ||δ||₂ = 1}
+                    </div>
+                    <p><strong>C(S):</strong> Restricted cone around true support S</p>
+                    <p><strong>Ensures:</strong> Design matrix X is "well-behaved" on sparse vectors</p>
+                    <p><strong>Weaker than:</strong> Traditional conditions like incoherence</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧠 Computational Aspects</h2>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <h5>🚀 Coordinate Descent</h5>
+                        <p><strong>For Lasso:</strong> Update one coordinate at a time</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            β̂ⱼ ← S(X'ⱼ(Y - X₋ⱼβ₋ⱼ)/||Xⱼ||², λ/||Xⱼ||²)
+                        </div>
+                        <p><strong>S(·,·):</strong> Soft thresholding operator</p>
+                        <p><strong>Advantage:</strong> Very fast, scales to huge problems</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🛤️ LARS Algorithm</h5>
+                        <p><strong>Least Angle Regression:</strong> Computes entire Lasso path</p>
+                        <p><strong>Key insight:</strong> Lasso solutions are piecewise linear in λ</p>
+                        <p><strong>Output:</strong> All solutions for different λ values</p>
+                        <p><strong>Use:</strong> Cross-validation for λ selection</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📊 Proximal Methods</h5>
+                        <p><strong>General framework:</strong> For non-smooth optimization</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            prox_λg(x) = argmin{g(z) + ||z-x||²/(2λ)}
+                        </div>
+                        <p><strong>Examples:</strong> ISTA, FISTA for Lasso</p>
+                        <p><strong>Advantage:</strong> Handles complex penalties</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🎯 Screening Rules</h5>
+                        <p><strong>Safe screening:</strong> Identify zero coefficients before solving</p>
+                        <p><strong>Idea:</strong> If coefficient would be zero, don't include in optimization</p>
+                        <p><strong>Dramatic speedups:</strong> Especially for very sparse solutions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Multiple Testing</h2>
+
+                <div class="highdim-box">
+                    <h4>⚠️ The Multiple Testing Problem</h4>
+                    <p><strong>Testing p hypotheses simultaneously</strong></p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        H₀ⱼ: βⱼ = 0 vs H₁ⱼ: βⱼ ≠ 0, j = 1,...,p
+                    </div>
+                    <p><strong>Problem:</strong> If p is large, many false discoveries by chance</p>
+                    <p><strong>Example:</strong> Testing 20,000 genes at α = 0.05 gives 1,000 false positives!</p>
+                </div>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <h5>📊 Bonferroni Correction</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Reject H₀ⱼ if pⱼ ≤ α/p
+                        </div>
+                        <p><strong>Controls:</strong> Family-wise error rate (FWER)</p>
+                        <p><strong>Conservative:</strong> Very low power when p is large</p>
+                        <p><strong>Use:</strong> When any false positive is serious</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🎯 False Discovery Rate</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            FDR = E[V/max(R,1)]
+                        </div>
+                        <p><strong>V:</strong> Number of false discoveries</p>
+                        <p><strong>R:</strong> Total number of discoveries</p>
+                        <p><strong>More liberal:</strong> Controls proportion rather than count</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📈 Benjamini-Hochberg</h5>
+                        <p><strong>BH procedure:</strong> Controls FDR at level α</p>
+                        <ol>
+                            <li>Order p-values: p₍₁₎ ≤ ... ≤ p₍ₚ₎</li>
+                            <li>Find largest k such that p₍ₖ₎ ≤ k·α/p</li>
+                            <li>Reject H₍₁₎, ..., H₍ₖ₎</li>
+                        </ol>
+                        <p><strong>Adaptive versions</strong> estimate proportion of true nulls</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📊 Knockoffs</h5>
+                        <p><strong>Model-X knockoffs:</strong> Exact FDR control</p>
+                        <p><strong>Create knockoff variables:</strong> Have same distribution as original X</p>
+                        <p><strong>Compare importance:</strong> Original vs knockoff</p>
+                        <p><strong>Advantage:</strong> Exact control without independence</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Principal Component Analysis</h2>
+
+                <div class="sparsity-demo">
+                    <h4>📊 High-Dimensional PCA</h4>
+                    <p><strong>Goal:</strong> Find low-dimensional representation of high-dimensional data</p>
+                    <div class="formula-box">
+                        Maximize: v'Σv subject to ||v||₂ = 1
+                    </div>
+                    <p><strong>Challenge:</strong> When p > n, sample covariance is singular</p>
+                    <p><strong>Solutions:</strong> Regularization, random matrix theory</p>
+                </div>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <h5>🎯 Sparse PCA</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Maximize: v'Σv - λ||v||₁
+                            <br>Subject to: ||v||₂ = 1
+                        </div>
+                        <p><strong>Goal:</strong> Principal components with few non-zero loadings</p>
+                        <p><strong>Advantage:</strong> Interpretable components</p>
+                        <p><strong>Challenge:</strong> Non-convex optimization</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📊 Random Matrix Theory</h5>
+                        <p><strong>When p/n → γ ∈ (0,∞):</strong> Eigenvalue distribution is known</p>
+                        <p><strong>Marchenko-Pastur law:</strong> Describes null spectrum</p>
+                        <p><strong>Applications:</strong></p>
+                        <ul>
+                            <li>Detecting true signal vs noise</li>
+                            <li>Optimal shrinkage of eigenvalues</li>
+                            <li>Phase transitions in signal detection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Practical Guidelines</h2>
+
+                <div class="sparsity-demo">
+                    <h4>📋 High-Dimensional Analysis Workflow</h4>
+                    <ol>
+                        <li><strong>Explore sparsity:</strong> How many variables might be important?</li>
+                        <li><strong>Choose method:</strong> Lasso for selection, Ridge for prediction, Elastic Net for both</li>
+                        <li><strong>Tune parameters:</strong> Cross-validation for λ, information criteria</li>
+                        <li><strong>Assess stability:</strong> Bootstrap, subsampling to check robustness</li>
+                        <li><strong>Multiple testing:</strong> Control FDR if making many comparisons</li>
+                        <li><strong>Validate:</strong> Independent test set, time-based splitting</li>
+                        <li><strong>Interpret carefully:</strong> Selected variables may not be causal</li>
+                    </ol>
+                </div>
+
+                <div class="method-grid">
+                    <div class="example-box">
+                        <h5>✅ When High-Dim Methods Work</h5>
+                        <ul>
+                            <li><strong>Sparsity:</strong> Only few variables matter</li>
+                            <li><strong>Signal strength:</strong> True effects are not too small</li>
+                            <li><strong>Good design:</strong> Features not too correlated</li>
+                            <li><strong>Sufficient sample size:</strong> n ≥ s log p approximately</li>
+                        </ul>
+                    </div>
+
+                    <div class="curse-demo">
+                        <h4>❌ When They Struggle</h4>
+                        <ul>
+                            <li><strong>Dense signals:</strong> Many weak effects</li>
+                            <li><strong>High correlation:</strong> Multicollinearity issues</li>
+                            <li><strong>Very small n:</strong> Not enough data even for sparse models</li>
+                            <li><strong>No sparsity:</strong> All variables matter equally</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Future Directions</h2>
+
+                <div class="method-grid">
+                    <div class="method-card">
+                        <h5>🧠 Deep Learning Connections</h5>
+                        <p><strong>Neural networks:</strong> Ultimate high-dimensional models</p>
+                        <p><strong>Overparameterization:</strong> More parameters than data points</p>
+                        <p><strong>Implicit regularization:</strong> SGD provides regularization</p>
+                        <p><strong>Double descent:</strong> Test error can decrease after overfitting</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🔗 Causal High-Dimensional</h5>
+                        <p><strong>High-dimensional confounding:</strong> Many potential confounders</p>
+                        <p><strong>Double machine learning:</strong> Using ML for causal inference</p>
+                        <p><strong>High-dimensional IV:</strong> Many instruments</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📊 Post-Selection Inference</h5>
+                        <p><strong>Challenge:</strong> Valid inference after data-driven model selection</p>
+                        <p><strong>Solutions:</strong> Selective inference, data splitting, debiased methods</p>
+                        <p><strong>Goal:</strong> Honest confidence intervals and p-values</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🌐 Distributed Computing</h5>
+                        <p><strong>Massive datasets:</strong> Data too large for single machine</p>
+                        <p><strong>Communication constraints:</strong> Minimize data transfer</p>
+                        <p><strong>Federated learning:</strong> Privacy-preserving distributed analysis</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Key Takeaways</h2>
+
+                <div class="highdim-box">
+                    <h4>💡 Main Messages</h4>
+                    <ul>
+                        <li><strong>Traditional methods break:</strong> p > n requires new approaches</li>
+                        <li><strong>Sparsity is key:</strong> Assume only few variables matter</li>
+                        <li><strong>Regularization essential:</strong> Control complexity to prevent overfitting</li>
+                        <li><strong>Theory guides practice:</strong> Oracle inequalities inform method choice</li>
+                        <li><strong>Computation matters:</strong> Scalable algorithms crucial</li>
+                        <li><strong>Multiple testing unavoidable:</strong> Control false discoveries</li>
+                        <li><strong>Validation critical:</strong> Out-of-sample performance is what matters</li>
+                    </ul>
+                </div>
+
+                <div class="sparsity-demo">
+                    <h4>🎯 The High-Dimensional Mindset</h4>
+                    <p><strong>Embrace uncertainty:</strong> Perfect model identification impossible</p>
+                    <p><strong>Focus on prediction:</strong> Often more reliable than interpretation</p>
+                    <p><strong>Use domain knowledge:</strong> Incorporate prior information when possible</p>
+                    <p><strong>Be humble:</strong> Selected variables may not be causal</p>
+                    <p><strong>Validate extensively:</strong> Results can be fragile</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Chapters</h2>
+
+                <div class="method-grid">
+                    <div class="example-box">
+                        <h5>📊 To Inequalities (Chapter 5)</h5>
+                        <p><strong>Concentration inequalities:</strong> Foundation of high-dimensional theory</p>
+                        <p><strong>Random matrix theory:</strong> Probabilistic bounds on eigenvalues</p>
+                        <p><strong>Tail bounds:</strong> Control deviation of empirical processes</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🧪 To Hypothesis Testing (Chapter 11)</h5>
+                        <p><strong>Multiple testing:</strong> Control false discoveries</p>
+                        <p><strong>FDR procedures:</strong> More powerful than FWER</p>
+                        <p><strong>Power considerations:</strong> Detecting weak signals</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>📈 To Regression (Chapters 14-15)</h5>
+                        <p><strong>Regularized regression:</strong> Extensions of linear models</p>
+                        <p><strong>Variable selection:</strong> Choose important predictors</p>
+                        <p><strong>Prediction vs interpretation:</strong> Different goals, different methods</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🤖 To Machine Learning (Chapter 22)</h5>
+                        <p><strong>Overfitting prevention:</strong> Regularization techniques</p>
+                        <p><strong>Feature selection:</strong> Identifying relevant variables</p>
+                        <p><strong>Cross-validation:</strong> Model selection and tuning</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="method-grid">
+                    <div class="curse-demo" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Overfitting</h4>
+                        <p><strong>Problem:</strong> Model fits training data perfectly but fails on test data</p>
+                        <p><strong>Sign:</strong> Training error ≪ test error</p>
+                        <p><strong>Solutions:</strong> Regularization, cross-validation, larger sample</p>
+                    </div>
+
+                    <div class="curse-demo" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Data Snooping</h4>
+                        <p><strong>Problem:</strong> Using test data for model selection</p>
+                        <p><strong>Result:</strong> Overly optimistic performance estimates</p>
+                        <p><strong>Solution:</strong> Strict train/validation/test split</p>
+                    </div>
+
+                    <div class="curse-demo" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Ignoring Multiplicity</h4>
+                        <p><strong>Problem:</strong> Testing many hypotheses without adjustment</p>
+                        <p><strong>Result:</strong> Many false discoveries</p>
+                        <p><strong>Solution:</strong> FDR control, Bonferroni correction</p>
+                    </div>
+
+                    <div class="curse-demo" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Assuming Sparsity</h4>
+                        <p><strong>Problem:</strong> Sparsity assumption may be wrong</p>
+                        <p><strong>Reality:</strong> Many biological systems have dense effects</p>
+                        <p><strong>Check:</strong> Compare sparse vs dense methods</p>
+                    </div>
+
+                    <div class="curse-demo" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Confusing Selection with Causation</h4>
+                        <p><strong>Problem:</strong> Selected variables may not be causal</p>
+                        <p><strong>Lasso caveat:</strong> Can select correlated variables arbitrarily</p>
+                        <p><strong>Solution:</strong> Use causal inference methods when needed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📚 Summary</h2>
+
+                <div class="highdim-box">
+                    <h4>🌟 The High-Dimensional Story</h4>
+                    <p>High-dimensional statistics represents a fundamental shift in statistical thinking. When p > n, we can't rely on traditional asymptotic theory where n → ∞ with p fixed. Instead, we need:</p>
+                    
+                    <ul>
+                        <li><strong>New assumptions:</strong> Sparsity instead of low dimension</li>
+                        <li><strong>New methods:</strong> Regularization instead of unbiased estimation</li>
+                        <li><strong>New theory:</strong> Non-asymptotic bounds instead of CLT</li>
+                        <li><strong>New algorithms:</strong> Scalable optimization for massive problems</li>
+                        <li><strong>New validation:</strong> Multiple testing and robust evaluation</li>
+                    </ul>
+                    
+                    <p>This revolution has enabled analysis of genomic data, neuroimaging, text mining, and countless other modern applications where traditional methods would fail.</p>
+                </div>
+
+                <div class="sparsity-demo">
+                    <h4>🚀 Impact on Statistics</h4>
+                    <p><strong>Theoretical advances:</strong> Non-asymptotic theory, random matrix theory</p>
+                    <p><strong>Methodological innovation:</strong> Lasso, elastic net, sparse PCA</p>
+                    <p><strong>Computational breakthroughs:</strong> Coordinate descent, proximal methods</p>
+                    <p><strong>Applied impact:</strong> Genomics, neuroscience, machine learning</p>
+                    <p><strong>Ongoing challenges:</strong> Post-selection inference, causal discovery</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Looking Forward</h4>
+                    <p>High-dimensional statistics continues to evolve rapidly. Key frontiers include:</p>
+                    <ul>
+                        <li>Understanding deep learning through high-dimensional lens</li>
+                        <li>Developing methods for non-sparse, structured high-dimensional problems</li>
+                        <li>Bridging gap between prediction and causal inference</li>
+                        <li>Handling privacy constraints in distributed settings</li>
+                        <li>Scaling to truly massive datasets (p, n both enormous)</li>
+                    </ul>
+                    <p>The field that started with genomics now influences all of data science!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 20: Causal Inference</a>
+            <a href="#" class="nav-btn">Chapter 22: Machine Learning →</a>
+        </div>
+    </div>
+</body>
+</html>

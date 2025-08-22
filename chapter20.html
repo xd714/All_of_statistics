@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 20: Directed Graphs & Causal Inference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '→→→⟷⟷→→→';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 5em;
+            opacity: 0.1;
+            animation: flow 12s linear infinite;
+        }
+
+        @keyframes flow {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: causal-flow 10s ease-in-out infinite;
+        }
+
+        @keyframes causal-flow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, 20px) scale(1.2); }
+            66% { transform: translate(30px, -20px) scale(0.8); }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dag-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .dag-box::before {
+            content: '⟶';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 3em;
+            opacity: 0.3;
+            font-weight: bold;
+        }
+
+        .dag-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .causal-diagram {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.2em;
+            color: #2c3e50;
+            border: 3px solid #667eea;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '⊥';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #26a69a;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .confounding-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .confounding-box::before {
+            content: '⚠️';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0.7;
+        }
+
+        .confounding-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .path-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .path-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #26a69a;
+            box-shadow: 0 5px 15px rgba(38, 166, 154, 0.2);
+            text-align: center;
+        }
+
+        .path-card h5 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #26a69a;
+            padding-bottom: 10px;
+        }
+
+        .intervention-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .intervention-step {
+            background: rgba(255,255,255,0.2);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid rgba(255,255,255,0.5);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .discovery-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .method-card h5 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .path-types, .criteria-grid, .discovery-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 20: Directed Graphs & Causal Inference</h1>
+            <p>From Correlation to Causation: The Science of What Causes What</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 The Causal Revolution</h2>
+                <p>Understanding causation is one of the most important goals in science. Directed Acyclic Graphs (DAGs) provide a powerful framework for thinking about and identifying causal relationships from observational data.</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Why Causation Matters</h4>
+                    <p><strong>Policy Question:</strong> Will increasing education funding improve student outcomes?</p>
+                    <p><strong>Not enough to know:</strong> Schools with more funding have better outcomes</p>
+                    <p><strong>Need to know:</strong> What happens if we <em>intervene</em> and increase funding?</p>
+                    <p><strong>Challenge:</strong> Correlation ≠ Causation (confounding by socioeconomic status)</p>
+                </div>
+
+                <div class="confounding-box">
+                    <h4>⚠️ The Fundamental Problem of Causal Inference</h4>
+                    <p>We can never observe both potential outcomes for the same unit:</p>
+                    <ul>
+                        <li><strong>Y₁(1):</strong> Outcome if treated</li>
+                        <li><strong>Y₁(0):</strong> Outcome if not treated</li>
+                        <li><strong>Individual causal effect:</strong> Y₁(1) - Y₁(0) (unobservable!)</li>
+                    </ul>
+                    <p><strong>Solution:</strong> Use structural assumptions (encoded in DAGs) to identify causal effects from population data</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Directed Acyclic Graphs (DAGs)</h2>
+
+                <div class="dag-box">
+                    <h4>🎯 Definition and Components</h4>
+                    <p>A <span class="highlight">DAG</span> is a graph with:</p>
+                    <ul>
+                        <li><strong>Nodes (vertices):</strong> Variables</li>
+                        <li><strong>Directed edges (arrows):</strong> Direct causal relationships</li>
+                        <li><strong>Acyclic:</strong> No feedback loops</li>
+                    </ul>
+                    <div class="causal-diagram">
+                        X → Y: "X directly causes Y"
+                        <br>X → Z → Y: "X causes Y through Z"
+                        <br>X ← Z → Y: "Z causes both X and Y"
+                    </div>
+                </div>
+
+                <h3>Key Concepts</h3>
+                <div class="path-types">
+                    <div class="path-card">
+                        <h5>🎯 Parents</h5>
+                        <p>Direct causes of a variable</p>
+                        <div class="causal-diagram">
+                            pa(Y) = {X, Z} if X → Y ← Z
+                        </div>
+                    </div>
+
+                    <div class="path-card">
+                        <h5>👶 Children</h5>
+                        <p>Direct effects of a variable</p>
+                        <div class="causal-diagram">
+                            ch(X) = {Y, Z} if X → Y, X → Z
+                        </div>
+                    </div>
+
+                    <div class="path-card">
+                        <h5>🔗 Paths</h5>
+                        <p>Sequence of connected edges</p>
+                        <div class="causal-diagram">
+                            X → Z ← W → Y
+                            <br>(path from X to Y)
+                        </div>
+                    </div>
+
+                    <div class="path-card">
+                        <h5>🎲 Backdoor Paths</h5>
+                        <p>Non-causal paths from X to Y</p>
+                        <div class="causal-diagram">
+                            X ← Z → Y
+                            <br>(confounding path)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚧 d-separation</h2>
+
+                <div class="dag-box">
+                    <h4>🎯 The Key to Identifying Independence</h4>
+                    <p><span class="highlight">d-separation</span> tells us when variables are independent given a conditioning set</p>
+                    <p><strong>X and Y are d-separated by Z if:</strong> Every path from X to Y is "blocked" by Z</p>
+                </div>
+
+                <h3>Three Types of Path Structures</h3>
+                <div class="path-types">
+                    <div class="path-card">
+                        <h5>⛓️ Chain: X → Z → Y</h5>
+                        <div class="causal-diagram">
+                            X → Z → Y
+                        </div>
+                        <p><strong>Blocked if:</strong> Z ∈ conditioning set</p>
+                        <p><strong>Intuition:</strong> Z mediates the relationship</p>
+                        <p><strong>Example:</strong> Education → Income → Health</p>
+                    </div>
+
+                    <div class="path-card">
+                        <h5>🍴 Fork: X ← Z → Y</h5>
+                        <div class="causal-diagram">
+                            X ← Z → Y
+                        </div>
+                        <p><strong>Blocked if:</strong> Z ∈ conditioning set</p>
+                        <p><strong>Intuition:</strong> Z is common cause (confounder)</p>
+                        <p><strong>Example:</strong> Exercise ← Health → Longevity</p>
+                    </div>
+
+                    <div class="path-card">
+                        <h5>💥 Collider: X → Z ← Y</h5>
+                        <div class="causal-diagram">
+                            X → Z ← Y
+                        </div>
+                        <p><strong>Blocked if:</strong> Z ∉ conditioning set AND no descendant of Z in conditioning set</p>
+                        <p><strong>Intuition:</strong> Z is common effect</p>
+                        <p><strong>Example:</strong> Talent → Success ← Luck</p>
+                    </div>
+                </div>
+
+                <div class="confounding-box">
+                    <h4>🚨 Collider Bias (Selection Bias)</h4>
+                    <p><strong>Counterintuitive:</strong> Conditioning on a collider creates dependence!</p>
+                    <div class="example-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        <h4>🎬 Hollywood Example</h4>
+                        <p><strong>Variables:</strong> Acting Ability → Movie Success ← Attractiveness</p>
+                        <p><strong>Without conditioning:</strong> Acting ability and attractiveness are independent</p>
+                        <p><strong>Conditioning on success:</strong> Among successful actors, better actors tend to be less attractive (because attractive actors don't need as much talent to succeed)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Causal Effects and Interventions</h2>
+
+                <div class="intervention-demo">
+                    <h4>🔧 What is an Intervention?</h4>
+                    <p>An <span class="highlight">intervention</span> do(X = x) fixes X to value x and breaks all incoming causal arrows to X</p>
+                    
+                    <div class="intervention-step">
+                        <strong>Observational:</strong> P(Y | X = x) - "Seeing" X = x
+                    </div>
+                    <div class="intervention-step">
+                        <strong>Interventional:</strong> P(Y | do(X = x)) - "Setting" X = x
+                    </div>
+                    <div class="intervention-step">
+                        <strong>Key difference:</strong> Intervention removes confounding
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🚗 Traffic Light Example</h4>
+                    <p><strong>Observational:</strong> P(Accident | Light = Red) might be high</p>
+                    <p><strong>Why?</strong> Red lights occur at dangerous intersections</p>
+                    <p><strong>Interventional:</strong> P(Accident | do(Light = Red)) is low</p>
+                    <p><strong>Why?</strong> Forcing light to red makes intersection safer</p>
+                    
+                    <div class="causal-diagram">
+                        Danger → Light Color → Accident
+                        <br>Danger → Accident
+                        <br><br>
+                        After intervention do(Light = Red):
+                        <br>Danger   Light=Red → Accident
+                        <br>Danger → Accident
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 Identification Criteria</h2>
+
+                <h3>Backdoor Criterion</h3>
+                <div class="criteria-grid">
+                    <div class="dag-box">
+                        <h4>🚪 Backdoor Criterion</h4>
+                        <p>Set Z satisfies backdoor criterion for causal effect of X on Y if:</p>
+                        <ol>
+                            <li><strong>No descendants:</strong> No node in Z is a descendant of X</li>
+                            <li><strong>Blocks backdoor paths:</strong> Z d-separates X and Y when removing all edges from X</li>
+                        </ol>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(Y | do(X = x)) = Σ_z P(Y | X = x, Z = z)P(Z = z)
+                        </div>
+                    </div>
+
+                    <div class="dag-box">
+                        <h4>🚪 Frontdoor Criterion</h4>
+                        <p>Set M satisfies frontdoor criterion for X → Y if:</p>
+                        <ol>
+                            <li><strong>Intercepts all paths:</strong> M blocks all directed paths from X to Y</li>
+                            <li><strong>No backdoor to M:</strong> No backdoor path from X to M</li>
+                            <li><strong>X blocks backdoors to Y:</strong> All backdoor paths from M to Y are blocked by X</li>
+                        </ol>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(Y | do(X = x)) = Σ_m P(M = m | X = x) Σ_x' P(Y | M = m, X = x')P(X = x')
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎓 Education Example</h4>
+                    <div class="causal-diagram">
+                        Family Background → Education → Income
+                        <br>Family Background → Income
+                    </div>
+                    <p><strong>Question:</strong> What's the causal effect of education on income?</p>
+                    <p><strong>Problem:</strong> Family background confounds education and income</p>
+                    <p><strong>Solution:</strong> {Family Background} satisfies backdoor criterion</p>
+                    <div class="formula-box">
+                        P(Income | do(Education = e)) = 
+                        <br>Σ_f P(Income | Education = e, Family = f) × P(Family = f)
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Causal Discovery</h2>
+
+                <div class="discovery-methods">
+                    <div class="method-card">
+                        <h5>📊 Constraint-Based Methods</h5>
+                        <p><strong>Idea:</strong> Use conditional independence tests</p>
+                        <p><strong>Algorithm:</strong> PC Algorithm</p>
+                        <ul>
+                            <li>Start with complete graph</li>
+                            <li>Remove edges based on independence tests</li>
+                            <li>Orient edges using collider detection</li>
+                        </ul>
+                        <p><strong>Output:</strong> Markov equivalence class</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>📈 Score-Based Methods</h5>
+                        <p><strong>Idea:</strong> Optimize a score function</p>
+                        <p><strong>Examples:</strong> BIC, AIC, MDL</p>
+                        <ul>
+                            <li>Search over DAG space</li>
+                            <li>Balance fit vs complexity</li>
+                            <li>Computationally challenging</li>
+                        </ul>
+                        <p><strong>Advantage:</strong> Can distinguish equivalent DAGs</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h5>🔄 Functional Causal Models</h5>
+                        <p><strong>Idea:</strong> Use functional form assumptions</p>
+                        <p><strong>Examples:</strong> Linear non-Gaussian, additive noise</p>
+                        <ul>
+                            <li>Exploit non-linearities</li>
+                            <li>Non-Gaussian noise</li>
+                            <li>Stronger identifiability</li>
+                        </ul>
+                        <p><strong>Limitation:</strong> Strong assumptions required</p>
+                    </div>
+                </div>
+
+                <div class="confounding-box">
+                    <h4>⚠️ Challenges in Causal Discovery</h4>
+                    <ul>
+                        <li><strong>Markov equivalence:</strong> Multiple DAGs fit data equally well</li>
+                        <li><strong>Hidden confounders:</strong> Unmeasured variables bias results</li>
+                        <li><strong>Sample size:</strong> Need large samples for reliable tests</li>
+                        <li><strong>Faithfulness:</strong> Assumes no exact cancellations</li>
+                        <li><strong>Nonlinearity:</strong> Linear methods may miss complex relationships</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ Causal vs Statistical Inference</h2>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Statistical Inference</th>
+                        <th>Causal Inference</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Goal</strong></td>
+                        <td>Describe associations</td>
+                        <td>Identify causal effects</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Question</strong></td>
+                        <td>"What is P(Y|X)?"</td>
+                        <td>"What is P(Y|do(X))?"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data</strong></td>
+                        <td>Observational sufficient</td>
+                        <td>Need experiments or assumptions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Confounding</strong></td>
+                        <td>Nuisance parameter</td>
+                        <td>Central challenge</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interpretation</strong></td>
+                        <td>Predictive</td>
+                        <td>Actionable</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🛠️ Practical Applications</h2>
+
+                <div class="criteria-grid">
+                    <div class="example-box">
+                        <h4>💊 Medical Research</h4>
+                        <p><strong>Challenge:</strong> Ethical constraints on randomization</p>
+                        <p><strong>Solutions:</strong></p>
+                        <ul>
+                            <li>Natural experiments</li>
+                            <li>Instrumental variables</li>
+                            <li>Regression discontinuity</li>
+                            <li>Careful observational studies with DAGs</li>
+                        </ul>
+                        <p><strong>Example:</strong> Effect of smoking on lung cancer</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>💼 Economics & Policy</h4>
+                        <p><strong>Questions:</strong> What policies actually work?</p>
+                        <p><strong>Tools:</strong></p>
+                        <ul>
+                            <li>Difference-in-differences</li>
+                            <li>Regression discontinuity</li>
+                            <li>Instrumental variables</li>
+                            <li>Structural equation modeling</li>
+                        </ul>
+                        <p><strong>Example:</strong> Effect of minimum wage on employment</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🤖 Machine Learning</h4>
+                        <p><strong>Beyond prediction:</strong> Understanding mechanisms</p>
+                        <p><strong>Applications:</strong></p>
+                        <ul>
+                            <li>Fairness in algorithms</li>
+                            <li>Robustness to distribution shift</li>
+                            <li>Transfer learning</li>
+                            <li>Explainable AI</li>
+                        </ul>
+                        <p><strong>Example:</strong> Fair hiring algorithms</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="criteria-grid">
+                    <div class="confounding-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Confusing correlation with causation</h4>
+                        <p><strong>Problem:</strong> X and Y are correlated</p>
+                        <p><strong>Wrong conclusion:</strong> X causes Y</p>
+                        <p><strong>Possibilities:</strong> Y causes X, Z causes both, selection bias</p>
+                        <p><strong>Solution:</strong> Draw and analyze DAG</p>
+                    </div>
+
+                    <div class="confounding-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Bad controls</h4>
+                        <p><strong>Problem:</strong> Controlling for colliders or mediators</p>
+                        <p><strong>Result:</strong> Introduces bias instead of removing it</p>
+                        <p><strong>Example:</strong> Controlling for occupation when studying education → income</p>
+                        <p><strong>Solution:</strong> Use backdoor criterion</p>
+                    </div>
+
+                    <div class="confounding-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Assuming linear relationships</h4>
+                        <p><strong>Problem:</strong> Real relationships often nonlinear</p>
+                        <p><strong>Consequence:</strong> Miss important effect heterogeneity</p>
+                        <p><strong>Solution:</strong> Use flexible methods, check assumptions</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 The Future of Causal Inference</h2>
+
+                <div class="dag-box">
+                    <h4>🌟 Emerging Directions</h4>
+                    <ul>
+                        <li><strong>Machine learning integration:</strong> Causal representation learning</li>
+                        <li><strong>High-dimensional causality:</strong> Many variables, complex dependencies</li>
+                        <li><strong>Temporal causality:</strong> Time-varying treatments and confounders</li>
+                        <li><strong>Federated causal inference:</strong> Learning across multiple datasets</li>
+                        <li><strong>Causal fairness:</strong> Ensuring algorithmic equity</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Key Takeaways</h4>
+                    <p><strong>1. Structure matters:</strong> The causal structure is as important as the data</p>
+                    <p><strong>2. Assumptions are crucial:</strong> All causal inference requires untestable assumptions</p>
+                    <p><strong>3. Domain knowledge essential:</strong> Statistical methods can't replace subject matter expertise</p>
+                    <p><strong>4. Multiple approaches:</strong> Triangulate evidence from different methods</p>
+                    <p><strong>5. Transparency:</strong> Make assumptions explicit and test their plausibility</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 19: Survival Analysis</a>
+            <a href="#" class="nav-btn">Chapter 21: High-Dimensional Statistics →</a>
+        </div>
+    </div>
+</body>
+</html>
+            

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: CDF Estimation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #a8edea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '📊📈🔄📉📊';
+            position: absolute;
+            top: 50%;
+            left: -25%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: cdf-flow 14s linear infinite;
+        }
+
+        @keyframes cdf-flow {
+            0% { left: -25%; }
+            100% { left: 125%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -75px;
+            right: -75px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: step-function 10s ease-in-out infinite;
+        }
+
+        @keyframes step-function {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+            25% { transform: scale(1.2) rotate(90deg); opacity: 0.1; }
+            50% { transform: scale(0.8) rotate(180deg); opacity: 0.2; }
+            75% { transform: scale(1.1) rotate(270deg); opacity: 0.15; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empirical-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .empirical-box::before {
+            content: 'F̂ₙ';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 3em;
+            opacity: 0.3;
+            font-style: italic;
+        }
+
+        .empirical-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∑';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2.5em;
+            opacity: 0.2;
+            color: #26a69a;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∀ε>0';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .test-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-card h5 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .survival-demo {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #26a69a;
+            text-align: center;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 8: CDF Estimation</h1>
+            <p>Distribution-Free Methods and Empirical Processes</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>📊 The Empirical Distribution Function</h2>
+                <p>The empirical CDF is one of the most fundamental concepts in nonparametric statistics. It provides a natural, assumption-free way to estimate the true distribution from sample data.</p>
+                
+                <div class="empirical-box">
+                    <h4>🎯 Definition</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        F̂ₙ(x) = (1/n) ∑ᵢ₌₁ⁿ I(Xᵢ ≤ x)
+                    </div>
+                    <p><strong>Interpretation:</strong> Proportion of observations ≤ x</p>
+                    <p><strong>Key insight:</strong> F̂ₙ(x) is the natural estimator of F(x) = P(X ≤ x)</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Simple Example</h4>
+                    <p><strong>Data:</strong> {1, 3, 2, 5, 4}</p>
+                    <p><strong>Ordered:</strong> {1, 2, 3, 4, 5}</p>
+                    <div class="formula-box">
+                        F̂₅(1.5) = 1/5 = 0.2 (20% of data ≤ 1.5)
+                        <br>F̂₅(3.5) = 3/5 = 0.6 (60% of data ≤ 3.5)
+                        <br>F̂₅(6) = 5/5 = 1.0 (100% of data ≤ 6)
+                    </div>
+                    <p><strong>Shape:</strong> Step function with jumps of 1/n at each data point</p>
+                </div>
+
+                <div class="survival-demo">
+                    <h4>📈 Properties of Empirical CDF</h4>
+                    <ul>
+                        <li><strong>Unbiased:</strong> E[F̂ₙ(x)] = F(x) for all x</li>
+                        <li><strong>Consistent:</strong> F̂ₙ(x) →ᵖ F(x) for each x</li>
+                        <li><strong>Right-continuous:</strong> Like any CDF</li>
+                        <li><strong>Non-decreasing:</strong> Monotonic function</li>
+                        <li><strong>Bounded:</strong> 0 ≤ F̂ₙ(x) ≤ 1</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Glivenko-Cantelli Theorem</h2>
+
+                <div class="theorem-box">
+                    <h4>🌟 Strong Law for Empirical Processes</h4>
+                    <p>The empirical CDF converges uniformly to the true CDF:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        sup |F̂ₙ(x) - F(x)| →ᵃ·ˢ· 0 as n → ∞
+                        x∈ℝ
+                    </div>
+                    <p><strong>Remarkable:</strong> Convergence is uniform over all x, not just pointwise!</p>
+                    <p><strong>No assumptions needed</strong> about the underlying distribution F</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 What This Means</h4>
+                    <p><strong>Pointwise convergence:</strong> F̂ₙ(x) → F(x) for each fixed x</p>
+                    <p><strong>Uniform convergence:</strong> F̂ₙ converges to F everywhere simultaneously</p>
+                    <p><strong>Practical implication:</strong> For large n, F̂ₙ is close to F over the entire real line</p>
+                    
+                    <div class="formula-box">
+                        <strong>Intuition:</strong> The empirical CDF "learns" the true distribution
+                        <br>without making any parametric assumptions!
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📐 Dvoretzky-Kiefer-Wolfowitz Inequality</h2>
+
+                <div class="theorem-box">
+                    <h4>📊 Finite Sample Bounds</h4>
+                    <p>For any ε > 0:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(sup |F̂ₙ(x) - F(x)| > ε) ≤ 2e⁻²ⁿᵋ²
+                        x∈ℝ
+                    </div>
+                    <p><strong>Non-asymptotic bound:</strong> Works for any sample size n</p>
+                    <p><strong>Distribution-free:</strong> Bound holds regardless of F</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>📏 Confidence Bands</h4>
+                    <p><strong>Goal:</strong> Find bands around F̂ₙ that contain F with probability 1-α</p>
+                    <div class="formula-box">
+                        <strong>DKW confidence band:</strong>
+                        <br>[F̂ₙ(x) - εₙ, F̂ₙ(x) + εₙ]
+                        <br><br>
+                        where εₙ = √(log(2/α)/(2n))
+                    </div>
+                    <p><strong>Example:</strong> With α = 0.05, n = 100: εₙ ≈ 0.17</p>
+                    <p><strong>Interpretation:</strong> F lies within ±0.17 of F̂₁₀₀ with 95% confidence</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧪 Goodness-of-Fit Tests</h2>
+
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h5>📊 Kolmogorov-Smirnov Test</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            H₀: F = F₀ (specified distribution)
+                            <br><br>
+                            Dₙ = sup |F̂ₙ(x) - F₀(x)|
+                            x∈ℝ
+                        </div>
+                        <p><strong>Reject H₀</strong> if Dₙ > critical value</p>
+                        <p><strong>Advantage:</strong> Distribution-free under H₀</p>
+                        <p><strong>Use:</strong> Test if data follows specific distribution</p>
+                    </div>
+
+                    <div class="test-card">
+                        <h5>📈 Anderson-Darling Test</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            A² = n∫ (F̂ₙ(x) - F₀(x))²/[F₀(x)(1-F₀(x))] dF₀(x)
+                        </div>
+                        <p><strong>Advantage:</strong> More sensitive to tail differences</p>
+                        <p><strong>Weights:</strong> Gives more weight to tails than KS test</p>
+                        <p><strong>Common choice:</strong> For testing normality</p>
+                    </div>
+
+                    <div class="test-card">
+                        <h5>📊 Cramér-von Mises Test</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            W² = n∫ (F̂ₙ(x) - F₀(x))² dF₀(x)
+                        </div>
+                        <p><strong>L² distance:</strong> Squared differences integrated</p>
+                        <p><strong>Advantage:</strong> Sensitive to middle of distribution</p>
+                        <p><strong>Complement:</strong> Use with Anderson-Darling for complete picture</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Test Selection Guide</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Test</th>
+                            <th>Most Sensitive To</th>
+                            <th>When to Use</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Kolmogorov-Smirnov</strong></td>
+                            <td>Overall differences</td>
+                            <td>General goodness-of-fit, any distribution</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Anderson-Darling</strong></td>
+                            <td>Tail differences</td>
+                            <td>When tail behavior is important</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cramér-von Mises</strong></td>
+                            <td>Central differences</td>
+                            <td>When focus is on main body of distribution</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>👥 Two-Sample Tests</h2>
+
+                <div class="empirical-box">
+                    <h4>📊 Two-Sample Kolmogorov-Smirnov Test</h4>
+                    <p><strong>Question:</strong> Do two samples come from the same distribution?</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        H₀: F = G (same distribution)
+                        <br>H₁: F ≠ G (different distributions)
+                        <br><br>
+                        D_{m,n} = sup |F̂ₘ(x) - Ĝₙ(x)|
+                        x∈ℝ
+                    </div>
+                    <p>where F̂ₘ and Ĝₙ are empirical CDFs from two samples</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Medical Example</h4>
+                    <p><strong>Question:</strong> Do treatment and control groups have the same recovery time distribution?</p>
+                    <p><strong>Data:</strong> Treatment times: {5, 7, 6, 8, 9} days, Control times: {8, 10, 12, 11, 13} days</p>
+                    <div class="formula-box">
+                        <strong>Procedure:</strong>
+                        <br>1. Compute empirical CDFs for both groups
+                        <br>2. Find maximum difference D₅,₅
+                        <br>3. Compare to critical value
+                        <br>4. If D₅,₅ > critical value, reject H₀
+                    </div>
+                    <p><strong>Conclusion:</strong> If significant, treatment affects recovery time distribution</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎯 Asymptotic Distribution</h4>
+                    <p>Under H₀:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        √(mn/(m+n)) D_{m,n} ⇒ sup |B(t)|
+                        t∈[0,1]
+                    </div>
+                    <p>where B(t) is a Brownian bridge</p>
+                    <p><strong>Practical:</strong> Use tabulated critical values or bootstrap</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚰️ Survival Analysis Applications</h2>
+
+                <div class="survival-demo">
+                    <h4>📊 Kaplan-Meier Estimator</h4>
+                    <p><strong>Problem:</strong> Estimate survival function with censored data</p>
+                    <p><strong>Censoring:</strong> We know patient survived past time t, but don't know exact failure time</p>
+                </div>
+
+                <div class="empirical-box">
+                    <h4>🎯 Kaplan-Meier Formula</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Ŝ(t) = ∏_{tᵢ≤t} (1 - dᵢ/nᵢ)
+                    </div>
+                    <p><strong>Where:</strong></p>
+                    <ul>
+                        <li>dᵢ = number of deaths at time tᵢ</li>
+                        <li>nᵢ = number at risk just before tᵢ</li>
+                        <li>Product over all death times ≤ t</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Clinical Trial Example</h4>
+                    <p><strong>Data:</strong> 6 patients, times: 2, 3+, 5, 7+, 9, 12</p>
+                    <p><strong>+ denotes censoring</strong> (patient left study but was alive)</p>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Time</th>
+                            <th>Deaths</th>
+                            <th>At Risk</th>
+                            <th>Survival Prob</th>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>6</td>
+                            <td>5/6 = 0.833</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>(5/6)×(3/4) = 0.625</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>(5/6)×(3/4)×(1/2) = 0.313</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>(5/6)×(3/4)×(1/2)×(0/1) = 0</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="test-grid">
+                    <div class="test-card">
+                        <h5>📈 Log-rank Test</h5>
+                        <p><strong>Purpose:</strong> Compare survival curves between groups</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Z = (O₁ - E₁)/√V₁ ~ N(0,1)
+                        </div>
+                        <p>under H₀: equal survival distributions</p>
+                        <p><strong>Most powerful:</strong> Against proportional hazards alternatives</p>
+                    </div>
+
+                    <div class="test-card">
+                        <h5>📊 Greenwood's Formula</h5>
+                        <p><strong>Purpose:</strong> Estimate variance of Kaplan-Meier</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Var(Ŝ(t)) ≈ (Ŝ(t))² ∑_{tᵢ≤t} dᵢ/(nᵢ(nᵢ-dᵢ))
+                        </div>
+                        <p><strong>Use:</strong> Confidence bands for survival curves</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌐 Multivariate Extensions</h2>
+
+                <div class="empirical-box">
+                    <h4>📊 Multivariate Empirical Distribution</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        F̂ₙ(x) = (1/n) ∑ᵢ₌₁ⁿ I(X₁ᵢ ≤ x₁, ..., Xₐᵢ ≤ xₐ)
+                    </div>
+                    <p><strong>Challenge:</strong> Curse of dimensionality</p>
+                    <p><strong>Convergence rate:</strong> O(n^(-1/(2+d))) instead of O(n^(-1/2))</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 High-Dimensional Challenges</h4>
+                    <p><strong>Sparsity:</strong> In high dimensions, most regions have no data points</p>
+                    <p><strong>Slow convergence:</strong> Need exponentially more data as dimension increases</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Focus on lower-dimensional projections</li>
+                        <li>Use smoothing methods</li>
+                        <li>Exploit structure (independence, additivity)</li>
+                        <li>Dimension reduction techniques</li>
+                    </ul>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🔍 Copula Estimation</h4>
+                    <p><strong>Empirical copula:</strong> Links marginal distributions</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Ĉₙ(u₁, ..., uₐ) = F̂ₙ(F̂₁ₙ⁻¹(u₁), ..., F̂ₐₙ⁻¹(uₐ))
+                    </div>
+                    <p><strong>Advantage:</strong> Separates dependence structure from marginals</p>
+                    <p><strong>Application:</strong> Risk management, portfolio optimization</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Functional Data Analysis</h2>
+
+                <div class="example-box">
+                    <h4>📊 Function-Valued Data</h4>
+                    <p><strong>Examples:</strong> Growth curves, temperature profiles, stock price trajectories</p>
+                    <p><strong>Challenge:</strong> Each observation is a function, not a number</p>
+                    
+                    <div class="formula-box">
+                        <strong>Functional empirical process:</strong>
+                        <br>F̂ₙ(x)(t) = (1/n) ∑ᵢ₌₁ⁿ I(Xᵢ(t) ≤ x)
+                    </div>
+                    <p><strong>For each t:</strong> Standard empirical CDF of {X₁(t), ..., Xₙ(t)}</p>
+                </div>
+
+                <div class="survival-demo">
+                    <h4>🎯 Functional Central Limit Theorem</h4>
+                    <p><strong>Convergence:</strong> In function spaces like C[0,1] or L²[0,1]</p>
+                    <p><strong>Limit process:</strong> Gaussian process with known covariance</p>
+                    <p><strong>Applications:</strong> Testing hypotheses about functional data</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Practical Considerations</h2>
+
+                <div class="test-grid">
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Small sample issues</h4>
+                        <p><strong>Problem:</strong> Empirical CDF is step function</p>
+                        <p><strong>Result:</strong> Poor approximation of smooth CDFs</p>
+                        <p><strong>Solutions:</strong> Kernel smoothing, larger samples</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Ties in data</h4>
+                        <p><strong>Problem:</strong> Multiple observations at same value</p>
+                        <p><strong>Common with:</strong> Discrete data, rounded measurements</p>
+                        <p><strong>Solution:</strong> Modified test statistics, randomization</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ High dimensions</h4>
+                        <p><strong>Curse of dimensionality:</strong> Exponential sample size requirements</p>
+                        <p><strong>Solution:</strong> Focus on lower-dimensional summaries</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 When to Use Empirical Methods</h4>
+                    <p><strong>Advantages:</strong></p>
+                    <ul>
+                        <li>No distributional assumptions</li>
+                        <li>Robust to outliers</li>
+                        <li>Easy to understand and compute</li>
+                        <li>Strong theoretical guarantees</li>
+                    </ul>
+                    
+                    <p><strong>Disadvantages:</strong></p>
+                    <ul>
+                        <li>Can be inefficient if parametric model is correct</li>
+                        <li>Poor performance in high dimensions</li>
+                        <li>Step function nature with small samples</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Topics</h2>
+
+                <div class="test-grid">
+                    <div class="example-box">
+                        <h5>📊 To Bootstrap (Chapter 9)</h5>
+                        <p><strong>Foundation:</strong> Bootstrap resamples from empirical distribution</p>
+                        <p><strong>Connection:</strong> F̂ₙ is the "population" for bootstrap samples</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🎯 To Hypothesis Testing</h5>
+                        <p><strong>Distribution-free tests:</strong> Don't assume specific F₀</p>
+                        <p><strong>Robustness:</strong> Valid under minimal assumptions</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>📈 To Survival Analysis</h5>
+                        <p><strong>Kaplan-Meier:</strong> Empirical CDF with censoring</p>
+                        <p><strong>Log-rank test:</strong> Compare empirical survival functions</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🔮 To Machine Learning</h5>
+                        <p><strong>Empirical risk minimization:</strong> Uses empirical distribution</p>
+                        <p><strong>Model validation:</strong> Compare empirical distributions of residuals</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Key Takeaways</h2>
+
+                <div class="empirical-box">
+                    <h4>💡 Main Messages</h4>
+                    <ul>
+                        <li><strong>Universality:</strong> Empirical CDF works for any distribution</li>
+                        <li><strong>Consistency:</strong> Glivenko-Cantelli theorem guarantees convergence</li>
+                        <li><strong>Finite-sample bounds:</strong> DKW inequality provides practical guidance</li>
+                        <li><strong>Foundation for testing:</strong> Basis for many nonparametric tests</li>
+                        <li><strong>Robustness:</strong> Minimal assumptions, maximum flexibility</li>
+                    </ul>
+                </div>
+
+                <div class="survival-demo">
+                    <h4>🎯 Practical Impact</h4>
+                    <p><strong>Exploratory analysis:</strong> Always plot empirical CDF first!</p>
+                    <p><strong>Model checking:</strong> Compare fitted vs empirical CDFs</p>
+                    <p><strong>Distribution-free inference:</strong> When you can't assume normality</p>
+                    <p><strong>Bootstrap foundation:</strong> Resampling from empirical distribution</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 7: Statistical Inference</a>
+            <a href="#" class="nav-btn">Chapter 9: Bootstrap →</a>
+        </div>
+    </div>
+</body>
+</html>

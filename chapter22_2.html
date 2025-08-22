@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 22: Smoothing Using Orthogonal Functions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 50%, #6bcf7f 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '∑∞ ψ φ ∑∞ ψ φ';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 6em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #ff6b6b;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .method-type {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .method-type::before {
+            content: '∑';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .method-type:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .method-type h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∫';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #6bcf7f 0%, #4e7d52 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(107, 207, 127, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∀x';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #c44569;
+            text-align: center;
+        }
+
+        .sequence-demo {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .sequence-demo .arrow {
+            color: #e67e22;
+            font-size: 2em;
+        }
+
+        .basis-box {
+            background: linear-gradient(135deg, #6bcf7f 0%, #4e7d52 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(107, 207, 127, 0.3);
+        }
+
+        .basis-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .pitfall-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .pitfall-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 22: Smoothing Using Orthogonal Functions</h1>
+            <p>Mathematical Foundations of Function Approximation</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Why Orthogonal Functions?</h2>
+                <p>Orthogonal function smoothing provides an alternative to kernel methods for nonparametric curve estimation. Instead of local averaging, we project the unknown function onto a finite-dimensional space spanned by orthogonal basis functions.</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Key Advantages</h4>
+                    <p><strong>Global approach:</strong> Uses all data points for each coefficient</p>
+                    <p><strong>Computational efficiency:</strong> Fast transforms (FFT, wavelets)</p>
+                    <p><strong>Theoretical foundation:</strong> Clear bias-variance decomposition</p>
+                    <p><strong>Adaptivity:</strong> Can handle functions with varying smoothness</p>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🔍 Basic Idea</h4>
+                    <div class="sequence-demo">
+                        <span>f(x)</span>
+                        <span class="arrow">≈</span>
+                        <span>∑<sub>j=1</sub><sup>J</sup> θ<sub>j</sub>φ<sub>j</sub>(x)</span>
+                    </div>
+                    <p>Approximate function f using finite linear combination of orthogonal basis functions {φ<sub>j</sub>}</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Orthogonal Functions and Projections</h2>
+
+                <div class="basis-box">
+                    <h4>🎯 Hilbert Space Setup</h4>
+                    <p>Let ℋ be a Hilbert space with inner product ⟨f, g⟩</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        Orthonormal basis: ⟨φⱼ, φₖ⟩ = δⱼₖ
+                        <br>Function expansion: f = ∑ⱼ θⱼ φⱼ
+                        <br>Fourier coefficients: θⱼ = ⟨f, φⱼ⟩
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📐 Projection Theorem</h4>
+                    <p>The finite approximation f<sub>J</sub>(x) = ∑<sub>j=1</sub><sup>J</sup> θⱼφⱼ(x) minimizes:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        ‖f - g‖² over all g ∈ span{φ₁, ..., φⱼ}
+                    </div>
+                    <p><strong>Optimality:</strong> Best approximation in the given subspace</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>🎼 Examples of Bases</h4>
+                        <ul>
+                            <li><strong>Fourier:</strong> {1, cos(jx), sin(jx)}</li>
+                            <li><strong>Wavelets:</strong> {ψⱼ,ₖ(x) = 2^(j/2)ψ(2ʲx-k)}</li>
+                            <li><strong>Polynomials:</strong> {1, x, x², ...}</li>
+                            <li><strong>Splines:</strong> B-spline basis functions</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🔧 Inner Products</h4>
+                        <ul>
+                            <li><strong>L²[0,2π]:</strong> ⟨f,g⟩ = ∫₀²π f(x)g(x)dx</li>
+                            <li><strong>Weighted:</strong> ⟨f,g⟩ = ∫ f(x)g(x)w(x)dx</li>
+                            <li><strong>Discrete:</strong> ⟨f,g⟩ = ∑ᵢ f(xᵢ)g(xᵢ)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Estimation Methodology</h2>
+
+                <div class="method-type">
+                    <h4>📊 Method of Moments Estimator</h4>
+                    <p>Given observations (X₁, Y₁), ..., (Xₙ, Yₙ) where Yᵢ = f(Xᵢ) + εᵢ:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        θ̂ⱼ = (1/n) ∑ᵢ₌₁ⁿ Yᵢ φⱼ(Xᵢ)
+                        <br><br>
+                        f̂ⱼ(x) = ∑ⱼ₌₁ᴶ θ̂ⱼ φⱼ(x)
+                    </div>
+                    <p><strong>Interpretation:</strong> Empirical version of Fourier coefficients</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📈 Bias and Variance Decomposition</h4>
+                    <p>For fixed design points and Gaussian noise εᵢ ~ N(0, σ²):</p>
+                    <ul>
+                        <li><strong>Bias:</strong> E[f̂ⱼ(x)] - f(x) = f(x) - fⱼ(x)</li>
+                        <li><strong>Variance:</strong> Var(f̂ⱼ(x)) = (σ²/n) ∑ⱼ₌₁ᴶ φⱼ²(x)</li>
+                        <li><strong>MSE:</strong> |f(x) - fⱼ(x)|² + (σ²/n) ∑ⱼ₌₁ᴶ φⱼ²(x)</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>⚖️ Bias-Variance Tradeoff</h4>
+                    <p><strong>Small J:</strong> Low variance, high bias (underfit)</p>
+                    <p><strong>Large J:</strong> High variance, low bias (overfit)</p>
+                    <p><strong>Optimal J:</strong> Minimizes MSE = Bias² + Variance</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎼 Fourier Series Methods</h2>
+
+                <div class="basis-box">
+                    <h4>🌊 Trigonometric Basis</h4>
+                    <p>For functions on [0, 2π], the trigonometric basis is:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        φ₀(x) = 1/√(2π)
+                        <br>φ₂ⱼ₋₁(x) = cos(jx)/√π
+                        <br>φ₂ⱼ(x) = sin(jx)/√π
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔄 Fourier Series Approximation</h4>
+                    <div class="formula-box">
+                        fⱼ(x) = a₀/2 + ∑ⱼ₌₁ᴶ/² [aⱼcos(jx) + bⱼsin(jx)]
+                    </div>
+                    <p><strong>Coefficients:</strong></p>
+                    <ul>
+                        <li>a₀ = (2/π) ∫₀²π f(x)dx</li>
+                        <li>aⱼ = (2/π) ∫₀²π f(x)cos(jx)dx</li>
+                        <li>bⱼ = (2/π) ∫₀²π f(x)sin(jx)dx</li>
+                    </ul>
+                </div>
+
+                <div class="grid-2">
+                    <div class="method-type">
+                        <h4>⚡ Fast Fourier Transform</h4>
+                        <p>When design points are equally spaced, use FFT for O(n log n) computation</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Discrete Fourier Transform:
+                            <br>X_k = ∑ⱼ₌₀ⁿ⁻¹ xⱼ e^(-2πijk/n)
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🎯 Applications</h4>
+                        <ul>
+                            <li><strong>Periodic signals:</strong> Natural choice</li>
+                            <li><strong>Time series:</strong> Spectral analysis</li>
+                            <li><strong>Image processing:</strong> 2D Fourier methods</li>
+                            <li><strong>Signal denoising:</strong> Low-pass filtering</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌊 Wavelet Methods</h2>
+
+                <div class="basis-box">
+                    <h4>🔍 Wavelet Basis</h4>
+                    <p>Wavelets provide localization in both time and frequency:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Scaling functions: φⱼ,ₖ(x) = 2^(j/2) φ(2ʲx - k)
+                        <br>Wavelets: ψⱼ,ₖ(x) = 2^(j/2) ψ(2ʲx - k)
+                    </div>
+                    <p>Where j controls <strong>scale</strong> and k controls <strong>location</strong></p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="method-type">
+                        <h4>🏗️ Multiresolution Analysis</h4>
+                        <p>Decompose function into multiple scales:</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            f(x) = ∑ₖ αⱼ,ₖ φⱼ,ₖ(x) + 
+                            <br>∑ⱼ'=1ᴶ ∑ₖ βⱼ',ₖ ψⱼ',ₖ(x)
+                        </div>
+                        <ul>
+                            <li><strong>αⱼ,ₖ:</strong> Approximation coefficients</li>
+                            <li><strong>βⱼ,ₖ:</strong> Detail coefficients</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-type">
+                        <h4>✂️ Thresholding</h4>
+                        <p>Key advantage: can threshold detail coefficients</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Hard: threshold(x,λ) = x·I(|x| > λ)
+                            <br>Soft: threshold(x,λ) = sign(x)(|x|-λ)₊
+                        </div>
+                        <p><strong>Effect:</strong> Adaptive smoothing, preserves edges</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Wavelet Advantages</h4>
+                    <ul>
+                        <li><strong>Adaptivity:</strong> Automatically adapts to local smoothness</li>
+                        <li><strong>Edge preservation:</strong> Good for functions with jumps</li>
+                        <li><strong>Computational efficiency:</strong> Fast wavelet transform</li>
+                        <li><strong>Sparsity:</strong> Many coefficients are small</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌿 Splines as Projections</h2>
+
+                <div class="theorem-box">
+                    <h4>📐 Spline Spaces</h4>
+                    <p>A spline of degree d with knots t₁ < ... < tₖ is a piecewise polynomial that is (d-1) times continuously differentiable</p>
+                </div>
+
+                <div class="method-type">
+                    <h4>🔧 B-spline Basis</h4>
+                    <p>Spline space can be represented using B-spline basis {B₁, ..., Bₖ₊ₐ₊₁}</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        s(x) = ∑ⱼ₌₁ᴷ⁺ᵈ⁺¹ cⱼ Bⱼ(x)
+                    </div>
+                    <p><strong>Properties:</strong> Local support, numerical stability</p>
+                </div>
+
+                <div class="basis-box">
+                    <h4>🎯 Smoothing Splines</h4>
+                    <p>Minimize penalized sum of squares:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        ∑ᵢ₌₁ⁿ (Yᵢ - f(Xᵢ))² + λ ∫ (f''(x))² dx
+                    </div>
+                    <p><strong>Solution:</strong> Natural cubic spline with knots at data points</p>
+                    <p><strong>Parameter λ:</strong> Controls smoothness vs fidelity tradeoff</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Model Selection</h2>
+
+                <div class="grid-2">
+                    <div class="method-type">
+                        <h4>✅ Cross-Validation</h4>
+                        <p>Choose J to minimize cross-validation error:</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            CV(J) = (1/n) ∑ᵢ₌₁ⁿ (Yᵢ - f̂ⱼ⁽⁻ⁱ⁾(Xᵢ))²
+                        </div>
+                        <p>Where f̂ⱼ⁽⁻ⁱ⁾ is estimate without i-th observation</p>
+                    </div>
+
+                    <div class="method-type">
+                        <h4>⚡ Generalized CV</h4>
+                        <p>For orthogonal bases, efficient GCV formula:</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            GCV(J) = n∑ᵢ(Yᵢ - f̂ⱼ(Xᵢ))² / (n - J)²
+                        </div>
+                        <p><strong>Advantage:</strong> No need to refit n times</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>📈 Information Criteria</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Formula</th>
+                            <th>Penalty</th>
+                        </tr>
+                        <tr>
+                            <td><strong>AIC</strong></td>
+                            <td>n log(RSS/n) + 2J</td>
+                            <td>Linear in J</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BIC</strong></td>
+                            <td>n log(RSS/n) + J log(n)</td>
+                            <td>Stronger penalty</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mallows Cp</strong></td>
+                            <td>RSS/σ² + 2J - n</td>
+                            <td>Unbiased risk estimate</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📏 Risk Properties and Rates</h2>
+
+                <div class="theorem-box">
+                    <h4>🎯 Minimax Rates</h4>
+                    <p>For functions in Sobolev space W^s (s bounded derivatives):</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        inf sup E‖f̂ - f‖² ≍ n^(-2s/(2s+1))
+                        f̂  f∈W^s
+                    </div>
+                    <p><strong>Achievability:</strong> Both wavelets and smoothing splines achieve this rate</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="method-type">
+                        <h4>🔄 Adaptive Methods</h4>
+                        <p>Achieve near-optimal rates without knowing smoothness s:</p>
+                        <ul>
+                            <li><strong>Wavelet thresholding:</strong> Donoho-Johnstone estimators</li>
+                            <li><strong>Model selection:</strong> Cross-validation, penalized methods</li>
+                            <li><strong>Stein's unbiased risk:</strong> SURE-based selection</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 Rate Comparison</h4>
+                        <table class="comparison-table">
+                            <tr>
+                                <th>Method</th>
+                                <th>Rate</th>
+                                <th>Adaptive?</th>
+                            </tr>
+                            <tr>
+                                <td>Fourier (known s)</td>
+                                <td>n^(-2s/(2s+1))</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>Wavelet threshold</td>
+                                <td>n^(-2s/(2s+1)) log n</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Smoothing splines</td>
+                                <td>n^(-2s/(2s+1))</td>
+                                <td>With GCV</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Practical Considerations</h2>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>🚫 Boundary Effects</h4>
+                        <p><strong>Problem:</strong> Orthogonal functions may not handle boundaries well</p>
+                        <p><strong>Solutions:</strong></p>
+                        <ul>
+                            <li>Boundary correction methods</li>
+                            <li>Reflection/extension techniques</li>
+                            <li>Boundary-adapted bases</li>
+                        </ul>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>⚡ Computational Issues</h4>
+                        <p><strong>Advantages:</strong></p>
+                        <ul>
+                            <li>FFT makes Fourier methods O(n log n)</li>
+                            <li>Fast wavelet transforms</li>
+                            <li>Splines lead to banded systems</li>
+                        </ul>
+                        <p><strong>Disadvantages:</strong></p>
+                        <ul>
+                            <li>May need many terms for good approximation</li>
+                            <li>Choice of basis crucial</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Method Selection Guidelines</h4>
+                    <ul>
+                        <li><strong>Fourier:</strong> Periodic functions, smooth signals</li>
+                        <li><strong>Wavelets:</strong> Functions with edges/jumps, varying smoothness</li>
+                        <li><strong>Splines:</strong> General purpose, good boundary behavior</li>
+                        <li><strong>Polynomials:</strong> Simple smooth functions, low order</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Topics</h2>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>📊 To Chapter 21 (Kernel Methods)</h4>
+                        <ul>
+                            <li>Global vs local approaches</li>
+                            <li>Bandwidth selection parallels</li>
+                            <li>Bias-variance tradeoffs</li>
+                            <li>Rate optimality comparisons</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🔢 To Linear Algebra</h4>
+                        <ul>
+                            <li>Orthogonal projections</li>
+                            <li>Hilbert space theory</li>
+                            <li>Singular value decomposition</li>
+                            <li>Principal component analysis</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Signal Processing</h4>
+                        <ul>
+                            <li>Fourier analysis</li>
+                            <li>Time-frequency representations</li>
+                            <li>Filter design</li>
+                            <li>Spectral estimation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Summary and Key Takeaways</h2>
+
+                <div class="basis-box">
+                    <h4>🎯 Main Messages</h4>
+                    <ul>
+                        <li><strong>Global approach:</strong> Orthogonal functions use all data for each coefficient</li>
+                        <li><strong>Basis selection matters:</strong> Choose basis appropriate for function class</li>
+                        <li><strong>Computational efficiency:</strong> Fast transforms enable large-scale applications</li>
+                        <li><strong>Adaptivity possible:</strong> Thresholding and model selection provide adaptation</li>
+                        <li><strong>Optimal rates:</strong> Can achieve minimax rates for smooth function classes</li>
+                        <li><strong>Complementary to kernels:</strong> Different strengths for different problems</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Big Picture</h4>
+                    <p>Orthogonal function methods provide a powerful alternative to kernel-based smoothing, especially when computational efficiency, global structure, or adaptation to varying smoothness is important.</p>
+                    <p><strong>Key advantages:</strong> Fast computation, theoretical guarantees, natural handling of periodic/structured functions</p>
+                    <p><strong>Key challenges:</strong> Boundary effects, basis selection, global nature can miss local features</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎓 For Further Study</h4>
+                    <p>Advanced topics in orthogonal function methods:</p>
+                    <ul>
+                        <li><strong>Harmonic analysis:</strong> General theory of function spaces</li>
+                        <li><strong>Approximation theory:</strong> Rate of approximation by different bases</li>
+                        <li><strong>Compressed sensing:</strong> Sparse recovery in orthogonal bases</li>
+                        <li><strong>Multiscale methods:</strong> Advanced wavelet theory</li>
+                        <li><strong>Functional data analysis:</strong> Infinite-dimensional extensions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 21: Kernel Methods</a>
+            <a href="#" class="nav-btn">Chapter 23: Classification →</a>
+        </div>
+    </div>
+</body>
+</html>

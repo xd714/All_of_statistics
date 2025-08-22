@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 24: Simulation Methods</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🎲🔀🎰🔄⚡';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 6em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .method-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .method-type::before {
+            content: '🎲';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .method-type:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .method-type h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+        }
+
+        .formula-box::before {
+            content: '∫';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #d35400;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #4caf50;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.2);
+        }
+
+        .example-box h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0d47a1;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #2196f3;
+            box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #e91e63;
+            text-align: center;
+        }
+
+        .sequence-demo {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .sequence-demo .arrow {
+            color: #e67e22;
+            font-size: 2em;
+            margin: 0 10px;
+        }
+
+        .algorithm-box {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            color: #2e7d32;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border: 2px solid #4caf50;
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.3);
+        }
+
+        .algorithm-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 15px;
+        }
+
+        .pitfall-box {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: #c62828;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f44336;
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.3);
+        }
+
+        .pitfall-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .code-box {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .bootstrap-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #e65100;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #ff9800;
+            box-shadow: 0 10px 20px rgba(255, 152, 0, 0.3);
+        }
+
+        .mcmc-box {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            color: #4a148c;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #9c27b0;
+            box-shadow: 0 10px 20px rgba(156, 39, 176, 0.3);
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .sequence-demo {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .sequence-demo .arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 24: Simulation Methods</h1>
+            <p>Computational Tools for Statistical Inference</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Introduction</h2>
+                <p>Simulation methods have become indispensable tools in modern statistics. When analytical solutions are intractable, confidence intervals difficult to compute, or sampling distributions unknown, simulation provides powerful alternatives.</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Applications of Simulation</h4>
+                    <ul>
+                        <li><strong>Computing integrals and expectations</strong></li>
+                        <li><strong>Generating samples from complex distributions</strong></li>
+                        <li><strong>Estimating sampling distributions</strong></li>
+                        <li><strong>Conducting statistical inference</strong></li>
+                        <li><strong>Validating theoretical results</strong></li>
+                        <li><strong>Bootstrap and resampling methods</strong></li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🔍 Why Simulation?</h4>
+                    <p>Many statistical problems involve complex models where:</p>
+                    <div class="sequence-demo">
+                        <span>Analytical Solutions</span>
+                        <span class="arrow">❌</span>
+                        <span>Intractable</span>
+                        <span class="arrow">→</span>
+                        <span>Simulation</span>
+                        <span class="arrow">✅</span>
+                        <span>Approximate Solutions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Random Number Generation</h2>
+
+                <div class="theorem-box">
+                    <h4>🔢 Pseudo-Random Numbers</h4>
+                    <p>All simulation relies on generating uniform random numbers from Uniform(0,1)</p>
+                    <div class="formula-box">
+                        U₁, U₂, ... iid ~ Uniform(0,1)
+                    </div>
+                    <p><strong>Linear Congruential Generators:</strong> Xₙ₊₁ = (aXₙ + c) mod m</p>
+                </div>
+
+                <div class="method-type">
+                    <h4>🔄 Inverse Transform Method</h4>
+                    <p>Generate from any distribution with known CDF:</p>
+                    <div class="formula-box">
+                        If U ~ Uniform(0,1), then X = F⁻¹(U) has CDF F
+                    </div>
+                    <p><strong>Algorithm:</strong></p>
+                    <ol>
+                        <li>Generate U ~ Uniform(0,1)</li>
+                        <li>Return X = F⁻¹(U)</li>
+                    </ol>
+                </div>
+
+                <div class="example-box">
+                    <h4>💻 Example: Exponential Distribution</h4>
+                    <p>To generate X ~ Exp(λ):</p>
+                    <div class="code-box">
+import numpy as np
+
+def generate_exponential(lam, n):
+    """Generate n samples from Exponential(lam)"""
+    U = np.random.uniform(0, 1, n)
+    return -np.log(1 - U) / lam
+
+# Example usage
+samples = generate_exponential(2.0, 1000)
+                    </div>
+                </div>
+
+                <div class="method-type">
+                    <h4>🎯 Acceptance-Rejection Method</h4>
+                    <p>When inverse CDF is not available:</p>
+                    <div class="algorithm-box">
+                        <h4>📋 Algorithm</h4>
+                        <ol>
+                            <li>Find density g (easy to sample) and constant c such that f(x) ≤ cg(x)</li>
+                            <li>Generate Y from g and U ~ Uniform(0,1)</li>
+                            <li>If U ≤ f(Y)/(cg(Y)), return X = Y</li>
+                            <li>Otherwise, go to step 2</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Example: Beta Distribution</h4>
+                    <div class="code-box">
+def generate_beta_23(n):
+    """Generate n samples from Beta(2,3)"""
+    samples = []
+    while len(samples) < n:
+        Y = np.random.uniform(0, 1)  # Proposal
+        U = np.random.uniform(0, 1)
+        
+        # Beta(2,3) density: f(x) = 12x(1-x)²
+        # Max at x=1/3, f_max = 32/27
+        c = 32/27
+        
+        if U <= 12 * Y * (1-Y)**2 / c:
+            samples.append(Y)
+    
+    return np.array(samples)
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔢 Monte Carlo Integration</h2>
+
+                <div class="algorithm-box">
+                    <h4>📊 Basic Monte Carlo</h4>
+                    <p>Estimate θ = ∫ g(x) f(x) dx = E[g(X)]</p>
+                    <div class="formula-box">
+                        θ̂ₙ = (1/n) ∑ᵢ₌₁ⁿ g(Xᵢ)
+                    </div>
+                    <p>where X₁, ..., Xₙ iid ~ f</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📈 Convergence Properties</h4>
+                    <ul>
+                        <li><strong>Consistency:</strong> θ̂ₙ → θ almost surely</li>
+                        <li><strong>Asymptotic normality:</strong> √n(θ̂ₙ - θ) ⇝ N(0, σ²)</li>
+                        <li><strong>Standard error:</strong> se = √(σ̂²/n)</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>🥧 Example: Estimating π</h4>
+                    <p>Use π = 4∫₀¹ √(1-x²) dx = 4E[√(1-U²)]</p>
+                    <div class="code-box">
+def estimate_pi(n):
+    """Estimate π using Monte Carlo"""
+    U = np.random.uniform(0, 1, n)
+    theta_hat = 4 * np.mean(np.sqrt(1 - U**2))
+    
+    # Standard error
+    g_values = 4 * np.sqrt(1 - U**2)
+    se = np.std(g_values) / np.sqrt(n)
+    
+    return theta_hat, se
+
+# Example
+pi_est, se = estimate_pi(100000)
+print(f"π estimate: {pi_est:.4f} ± {1.96*se:.4f}")
+                    </div>
+                </div>
+
+                <div class="method-type">
+                    <h4>⚡ Importance Sampling</h4>
+                    <p>Use different distribution h for sampling:</p>
+                    <div class="formula-box">
+                        θ = ∫ g(x) f(x)/h(x) h(x) dx = Eₕ[g(X) w(X)]
+                    </div>
+                    <p>where w(x) = f(x)/h(x) is the importance weight</p>
+                    <p><strong>Advantage:</strong> Can reduce variance significantly</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔄 Bootstrap Methods</h2>
+
+                <div class="bootstrap-box">
+                    <h4>🎯 Bootstrap Principle</h4>
+                    <p>Use the sample to approximate the population</p>
+                    <div class="formula-box">
+                        Population: F → Sample: F̂ₙ<br>
+                        θ = T(F) → θ̂ = T(F̂ₙ)
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h4>📋 Bootstrap Algorithm</h4>
+                    <ol>
+                        <li>Draw bootstrap sample: X₁*, ..., Xₙ* ~ F̂ₙ</li>
+                        <li>Compute bootstrap statistic: θ̂* = T(F̂ₙ*)</li>
+                        <li>Repeat B times to get θ̂₁*, ..., θ̂ᵦ*</li>
+                        <li>Use bootstrap distribution for inference</li>
+                    </ol>
+                </div>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>📊 Bootstrap Standard Error</h4>
+                        <div class="formula-box">
+                            se_boot = √[(1/(B-1)) ∑ᵦ(θ̂ᵦ* - θ̄*)²]
+                        </div>
+                        <p>where θ̄* = (1/B)∑ᵦ θ̂ᵦ*</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🎯 Bootstrap Confidence Interval</h4>
+                        <p><strong>Percentile method:</strong></p>
+                        <div class="formula-box">
+                            [θ̂*₍α/₂₎, θ̂*₍₁₋α/₂₎]
+                        </div>
+                        <p>where θ̂*₍q₎ is q-th quantile</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>💻 Bootstrap Implementation</h4>
+                    <div class="code-box">
+def bootstrap_mean(data, B=1000):
+    """Bootstrap confidence interval for mean"""
+    n = len(data)
+    bootstrap_means = []
+    
+    for _ in range(B):
+        # Resample with replacement
+        boot_sample = np.random.choice(data, size=n, replace=True)
+        bootstrap_means.append(np.mean(boot_sample))
+    
+    # Confidence interval
+    ci_lower = np.percentile(bootstrap_means, 2.5)
+    ci_upper = np.percentile(bootstrap_means, 97.5)
+    
+    return ci_lower, ci_upper
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🔍 Bootstrap Applications</h4>
+                    <ul>
+                        <li><strong>Standard errors:</strong> When analytical formulas unavailable</li>
+                        <li><strong>Confidence intervals:</strong> Percentile, bias-corrected</li>
+                        <li><strong>Hypothesis testing:</strong> Bootstrap p-values</li>
+                        <li><strong>Bias estimation:</strong> bias = E[θ̂*] - θ̂</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Markov Chain Monte Carlo (MCMC)</h2>
+
+                <div class="mcmc-box">
+                    <h4>⛓️ Markov Chain Basics</h4>
+                    <p>A sequence X₀, X₁, X₂, ... is a Markov chain if:</p>
+                    <div class="formula-box">
+                        P(Xₙ₊₁ = x | X₀, ..., Xₙ) = P(Xₙ₊₁ = x | Xₙ)
+                    </div>
+                    <p><strong>Goal:</strong> Design chain with stationary distribution π</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📊 Ergodic Theorem</h4>
+                    <p>Under regularity conditions:</p>
+                    <div class="formula-box">
+                        (1/n) ∑ᵢ₌₁ⁿ g(Xᵢ) → E_π[g(X)]
+                    </div>
+                    <p>as n → ∞ for any function g with E_π[|g(X)|] < ∞</p>
+                </div>
+
+                <div class="algorithm-box">
+                    <h4>🎯 Metropolis-Hastings Algorithm</h4>
+                    <ol>
+                        <li>Start with X₀</li>
+                        <li>At step n, given Xₙ = x:</li>
+                        <ul>
+                            <li>Generate Y from proposal q(y|x)</li>
+                            <li>Compute α(x,y) = min(1, π(y)q(x|y) / π(x)q(y|x))</li>
+                            <li>Set Xₙ₊₁ = Y with probability α(x,y), else Xₙ₊₁ = x</li>
+                        </ul>
+                    </ol>
+                </div>
+
+                <div class="example-box">
+                    <h4>💻 Metropolis-Hastings Example</h4>
+                    <div class="code-box">
+def metropolis_hastings_gamma(alpha, beta, n_samples, sigma=0.5):
+    """Sample from Gamma(alpha, beta)"""
+    def log_target(x):
+        if x <= 0:
+            return -np.inf
+        return (alpha - 1) * np.log(x) - beta * x
+    
+    samples = []
+    current = alpha / beta  # Start at mode
+    
+    for _ in range(n_samples):
+        # Random walk proposal
+        proposal = current + np.random.normal(0, sigma)
+        
+        if proposal > 0:
+            log_alpha = log_target(proposal) - log_target(current)
+            alpha_prob = min(1, np.exp(log_alpha))
+            
+            if np.random.uniform() < alpha_prob:
+                current = proposal
+        
+        samples.append(current)
+    
+    return np.array(samples)
+                    </div>
+                </div>
+
+                <div class="method-type">
+                    <h4>🔄 Gibbs Sampling</h4>
+                    <p>For multivariate distributions with easy conditionals:</p>
+                    <div class="algorithm-box">
+                        <h4>📋 Gibbs Algorithm</h4>
+                        <p>For (X₁, X₂, ..., Xₖ) ~ π:</p>
+                        <ol>
+                            <li>Start with (X₁⁽⁰⁾, ..., Xₖ⁽⁰⁾)</li>
+                            <li>At iteration t:</li>
+                            <ul>
+                                <li>Sample X₁⁽ᵗ⁺¹⁾ ~ π(X₁ | X₂⁽ᵗ⁾, ..., Xₖ⁽ᵗ⁾)</li>
+                                <li>Sample X₂⁽ᵗ⁺¹⁾ ~ π(X₂ | X₁⁽ᵗ⁺¹⁾, X₃⁽ᵗ⁾, ..., Xₖ⁽ᵗ⁾)</li>
+                                <li>⋮</li>
+                                <li>Sample Xₖ⁽ᵗ⁺¹⁾ ~ π(Xₖ | X₁⁽ᵗ⁺¹⁾, ..., Xₖ₋₁⁽ᵗ⁺¹⁾)</li>
+                            </ul>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>📊 Gibbs for Bivariate Normal</h4>
+                    <div class="code-box">
+def gibbs_bivariate_normal(mu1, mu2, sigma1, sigma2, rho, n_samples):
+    """Gibbs sampling for bivariate normal"""
+    samples = np.zeros((n_samples, 2))
+    x1, x2 = 0, 0  # Starting values
+    
+    for i in range(n_samples):
+        # Sample x1 | x2
+        mu_cond1 = mu1 + rho * (sigma1/sigma2) * (x2 - mu2)
+        sigma_cond1 = sigma1 * np.sqrt(1 - rho**2)
+        x1 = np.random.normal(mu_cond1, sigma_cond1)
+        
+        # Sample x2 | x1
+        mu_cond2 = mu2 + rho * (sigma2/sigma1) * (x1 - mu1)
+        sigma_cond2 = sigma2 * np.sqrt(1 - rho**2)
+        x2 = np.random.normal(mu_cond2, sigma_cond2)
+        
+        samples[i] = [x1, x2]
+    
+    return samples
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 MCMC Diagnostics</h2>
+
+                <div class="grid-2">
+                    <div class="method-type">
+                        <h4>👁️ Visual Diagnostics</h4>
+                        <ul>
+                            <li><strong>Trace plots:</strong> Plot Xₜ vs t</li>
+                            <li><strong>Running averages:</strong> Check convergence</li>
+                            <li><strong>Autocorrelation:</strong> Assess mixing</li>
+                            <li><strong>Multiple chains:</strong> Different starting points</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-type">
+                        <h4>🔢 Numerical Diagnostics</h4>
+                        <ul>
+                            <li><strong>Gelman-Rubin R̂:</strong> Between/within chain variance</li>
+                            <li><strong>Effective sample size:</strong> Account for autocorrelation</li>
+                            <li><strong>Monte Carlo error:</strong> Simulation uncertainty</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📈 Effective Sample Size</h4>
+                    <p>Due to autocorrelation, MCMC samples aren't independent:</p>
+                    <div class="formula-box">
+                        ESS = n / (1 + 2∑ₖ₌₁^∞ ρₖ)
+                    </div>
+                    <p>where ρₖ is lag-k autocorrelation</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎛️ Practical Guidelines</h4>
+                    <ul>
+                        <li><strong>Burn-in:</strong> Discard initial samples</li>
+                        <li><strong>Thinning:</strong> Keep every k-th sample (optional)</li>
+                        <li><strong>Multiple chains:</strong> Check convergence</li>
+                        <li><strong>Proposal tuning:</strong> Aim for 20-50% acceptance</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Advanced Topics</h2>
+
+                <div class="grid-3">
+                    <div class="method-type">
+                        <h4>⚡ Hamiltonian Monte Carlo</h4>
+                        <p>Uses gradient information for better proposals:</p>
+                        <ul>
+                            <li>Introduce momentum variables</li>
+                            <li>Use Hamiltonian dynamics</li>
+                            <li>Effective for high dimensions</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-type">
+                        <h4>🔥 Parallel Tempering</h4>
+                        <p>Multiple chains at different "temperatures":</p>
+                        <ul>
+                            <li>Heated chains explore better</li>
+                            <li>Swap states between chains</li>
+                            <li>Good for multimodal distributions</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-type">
+                        <h4>🎯 Adaptive MCMC</h4>
+                        <p>Automatically tune proposals during sampling:</p>
+                        <ul>
+                            <li>Learn optimal proposal covariance</li>
+                            <li>Adapt step sizes</li>
+                            <li>Maintain ergodicity</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🌋 Curse of Dimensionality</h4>
+                    <p>As dimension d increases, simulation becomes challenging:</p>
+                    <ul>
+                        <li><strong>Volume concentration:</strong> Most mass in thin shells</li>
+                        <li><strong>Distance concentration:</strong> All points equidistant</li>
+                        <li><strong>Slow mixing:</strong> Random walks mix poorly</li>
+                    </ul>
+                    <p><strong>Solutions:</strong> Gradient-based methods, tempering, adaptive schemes</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Applications</h2>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>🔬 Bayesian Inference</h4>
+                        <p>MCMC essential for complex posterior distributions</p>
+                        <div class="code-box">
+# Bayesian linear regression
+def gibbs_linear_regression(y, X, n_samples):
+    n, p = X.shape
+    
+    # Priors: β ~ N(0, τI), σ² ~ InvGamma(a, b)
+    tau = 10.0
+    a, b = 1.0, 1.0
+    
+    # Initialize
+    beta = np.zeros(p)
+    sigma2 = 1.0
+    
+    samples = {'beta': [], 'sigma2': []}
+    
+    for _ in range(n_samples):
+        # Sample β | σ², y
+        V = np.linalg.inv(X.T @ X / sigma2 + np.eye(p) / tau)
+        m = V @ (X.T @ y / sigma2)
+        beta = np.random.multivariate_normal(m, V)
+        
+        # Sample σ² | β, y
+        resid = y - X @ beta
+        a_post = a + n/2
+        b_post = b + np.sum(resid**2)/2
+        sigma2 = 1/np.random.gamma(a_post, 1/b_post)
+        
+        samples['beta'].append(beta.copy())
+        samples['sigma2'].append(sigma2)
+    
+    return samples
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 Missing Data Imputation</h4>
+                        <p>Handle missing data through data augmentation:</p>
+                        <ol>
+                            <li>Treat missing values as parameters</li>
+                            <li>Sample missing values from conditional distribution</li>
+                            <li>Sample model parameters given complete data</li>
+                            <li>Iterate</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="bootstrap-box">
+                    <h4>🔍 Model Selection and Validation</h4>
+                    <p>Simulation methods for model comparison:</p>
+                    <ul>
+                        <li><strong>Cross-validation:</strong> Bootstrap estimates of prediction error</li>
+                        <li><strong>Information criteria:</strong> DIC, WAIC for Bayesian models</li>
+                        <li><strong>Posterior predictive checks:</strong> Simulate from fitted model</li>
+                        <li><strong>Bayes factors:</strong> Model comparison via marginal likelihoods</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Practical Considerations and Pitfalls</h2>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>🐌 Slow Convergence</h4>
+                        <p><strong>Symptoms:</strong> High autocorrelation, poor mixing</p>
+                        <p><strong>Solutions:</strong></p>
+                        <ul>
+                            <li>Better proposal distributions</li>
+                            <li>Reparameterization</li>
+                            <li>Gradient-based methods</li>
+                            <li>Parallel tempering</li>
+                        </ul>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>🎭 Mode Switching</h4>
+                        <p><strong>Problem:</strong> Chain stuck in local modes</p>
+                        <p><strong>Solutions:</strong></p>
+                        <ul>
+                            <li>Multiple chains from different starts</li>
+                            <li>Simulated tempering</li>
+                            <li>Longer burn-in periods</li>
+                            <li>Better initialization</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>⚡ Computational Efficiency</h4>
+                        <p><strong>Challenges:</strong> MCMC can be slow for large problems</p>
+                        <p><strong>Solutions:</strong></p>
+                        <ul>
+                            <li>Vectorized operations</li>
+                            <li>Parallel computing</li>
+                            <li>Approximation methods</li>
+                            <li>Efficient data structures</li>
+                        </ul>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>🎲 Random Number Quality</h4>
+                        <p><strong>Importance:</strong> Poor RNG can bias results</p>
+                        <p><strong>Best practices:</strong></p>
+                        <ul>
+                            <li>Use tested generators</li>
+                            <li>Set random seeds for reproducibility</li>
+                            <li>Check for patterns in output</li>
+                            <li>Periodicity considerations</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📊 Simulation Study Design</h4>
+                    <p><strong>Key principles:</strong></p>
+                    <ul>
+                        <li><strong>Sufficient sample size:</strong> Large enough for stable results</li>
+                        <li><strong>Multiple replications:</strong> Assess Monte Carlo error</li>
+                        <li><strong>Varied scenarios:</strong> Test across parameter space</li>
+                        <li><strong>Realistic settings:</strong> Match real-world conditions</li>
+                        <li><strong>Proper evaluation:</strong> Use appropriate metrics</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Topics</h2>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>📊 To Chapter 12 (Bayesian Methods)</h4>
+                        <ul>
+                            <li>MCMC for posterior sampling</li>
+                            <li>Gibbs sampling for hierarchical models</li>
+                            <li>Model comparison via simulation</li>
+                            <li>Posterior predictive checking</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🎯 To Chapter 10-11 (Inference/Testing)</h4>
+                        <ul>
+                            <li>Bootstrap hypothesis tests</li>
+                            <li>Permutation tests</li>
+                            <li>Confidence interval construction</li>
+                            <li>Power analysis via simulation</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Chapter 14-15 (Regression)</h4>
+                        <ul>
+                            <li>Bootstrap for regression inference</li>
+                            <li>Bayesian regression via MCMC</li>
+                            <li>Model selection uncertainty</li>
+                            <li>Prediction intervals</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🧠 To Chapter 22-23 (Machine Learning)</h4>
+                        <ul>
+                            <li>Bayesian neural networks</li>
+                            <li>MCMC for hyperparameter tuning</li>
+                            <li>Uncertainty quantification</li>
+                            <li>Ensemble methods</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 To Chapter 8 (CDF Estimation)</h4>
+                        <ul>
+                            <li>Bootstrap for empirical processes</li>
+                            <li>Simulation-based goodness-of-fit</li>
+                            <li>Kolmogorov-Smirnov test variants</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>⏰ To Time Series Analysis</h4>
+                        <ul>
+                            <li>State space models via particle filters</li>
+                            <li>MCMC for time series parameters</li>
+                            <li>Bootstrap for dependent data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💻 Software and Implementation</h2>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>🐍 Python Ecosystem</h4>
+                        <ul>
+                            <li><strong>NumPy:</strong> Basic random number generation</li>
+                            <li><strong>SciPy:</strong> Statistical distributions</li>
+                            <li><strong>PyMC:</strong> Probabilistic programming</li>
+                            <li><strong>Scikit-learn:</strong> Bootstrap utilities</li>
+                            <li><strong>Statsmodels:</strong> Statistical methods</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 R Ecosystem</h4>
+                        <ul>
+                            <li><strong>Base R:</strong> Built-in random generation</li>
+                            <li><strong>boot:</strong> Bootstrap methods</li>
+                            <li><strong>MCMCpack:</strong> MCMC algorithms</li>
+                            <li><strong>rstan:</strong> Hamiltonian Monte Carlo</li>
+                            <li><strong>coda:</strong> MCMC diagnostics</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h4>🎯 Best Practices for Implementation</h4>
+                    <ul>
+                        <li><strong>Reproducibility:</strong> Set random seeds</li>
+                        <li><strong>Efficiency:</strong> Vectorize operations when possible</li>
+                        <li><strong>Memory management:</strong> Be careful with large simulations</li>
+                        <li><strong>Progress monitoring:</strong> Track convergence in real-time</li>
+                        <li><strong>Validation:</strong> Test against known results</li>
+                        <li><strong>Documentation:</strong> Record all simulation parameters</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Summary and Key Takeaways</h2>
+
+                <div class="algorithm-box">
+                    <h4>🎯 Main Messages</h4>
+                    <ul>
+                        <li><strong>Versatile tool:</strong> Simulation handles complex problems analytically intractable</li>
+                        <li><strong>Foundation matters:</strong> Good random number generation is crucial</li>
+                        <li><strong>Method diversity:</strong> Different problems need different approaches</li>
+                        <li><strong>Bootstrap power:</strong> Resampling provides broad inferential tools</li>
+                        <li><strong>MCMC flexibility:</strong> Enables Bayesian inference for complex models</li>
+                        <li><strong>Diagnostics essential:</strong> Always check simulation quality</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Simulation Workflow</h4>
+                    <div class="sequence-demo">
+                        <span>Problem</span>
+                        <span class="arrow">→</span>
+                        <span>Method Choice</span>
+                        <span class="arrow">→</span>
+                        <span>Implementation</span>
+                        <span class="arrow">→</span>
+                        <span>Diagnostics</span>
+                        <span class="arrow">→</span>
+                        <span>Inference</span>
+                    </div>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Problem Type</th>
+                            <th>Recommended Method</th>
+                            <th>Key Considerations</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Integration</strong></td>
+                            <td>Monte Carlo, Importance Sampling</td>
+                            <td>Variance reduction techniques</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Uncertainty Quantification</strong></td>
+                            <td>Bootstrap</td>
+                            <td>Sample size, bias correction</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bayesian Inference</strong></td>
+                            <td>MCMC (Gibbs, Metropolis-Hastings)</td>
+                            <td>Convergence, mixing, diagnostics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Complex Distributions</strong></td>
+                            <td>Acceptance-Rejection, MCMC</td>
+                            <td>Efficiency, proposal design</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎓 For Further Study</h4>
+                    <p>Advanced simulation topics:</p>
+                    <ul>
+                        <li><strong>Variance reduction:</strong> Control variates, antithetic variables</li>
+                        <li><strong>Rare event simulation:</strong> Importance sampling for tail events</li>
+                        <li><strong>Sequential Monte Carlo:</strong> Particle filters for dynamic systems</li>
+                        <li><strong>Approximate Bayesian Computation:</strong> Likelihood-free inference</li>
+                        <li><strong>Variational inference:</strong> Optimization-based approximations</li>
+                        <li><strong>Hamiltonian Monte Carlo:</strong> Gradient-based sampling</li>
+                    </ul>
+                </div>
+
+                <div class="bootstrap-box">
+                    <h4>🔮 Future Directions</h4>
+                    <p>Simulation methods continue to evolve with:</p>
+                    <ul>
+                        <li><strong>Machine learning integration:</strong> Neural networks for proposals</li>
+                        <li><strong>Quantum computing:</strong> Quantum Monte Carlo methods</li>
+                        <li><strong>Big data applications:</strong> Scalable simulation algorithms</li>
+                        <li><strong>Automatic differentiation:</strong> Gradient computation for complex models</li>
+                        <li><strong>Cloud computing:</strong> Distributed simulation frameworks</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 23: Classification</a>
+            <a href="#" class="nav-btn">Appendix: Mathematical Background →</a>
+        </div>
+    </div>
+</body>
+</html>

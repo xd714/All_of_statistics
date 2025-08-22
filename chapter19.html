@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 19: Survival Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ff9a9e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '⏱️💗📊⚰️📈';
+            position: absolute;
+            top: 50%;
+            left: -25%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: survival-flow 14s linear infinite;
+        }
+
+        @keyframes survival-flow {
+            0% { left: -25%; }
+            100% { left: 125%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: heartbeat 4s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.3); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .survival-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .survival-box::before {
+            content: 'S(t)';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 3em;
+            opacity: 0.3;
+            font-style: italic;
+        }
+
+        .survival-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: 'λ(t)';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #26a69a;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .censoring-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .censoring-box::before {
+            content: '⚠️';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0.7;
+        }
+
+        .censoring-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .model-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .model-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .model-card h5 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .kaplan-meier {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #26a69a;
+            text-align: center;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .model-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 19: Survival Analysis</h1>
+            <p>Time-to-Event Data and Censored Observations</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>⏰ Introduction to Survival Analysis</h2>
+                <p>Survival analysis studies the time until an event occurs. Originally developed for medical studies (time until death), it's now used across many fields to analyze duration data.</p>
+                
+                <div class="survival-box">
+                    <h4>🎯 Key Concepts</h4>
+                    <p><strong>Event:</strong> Death, failure, relapse, graduation, etc.</p>
+                    <p><strong>Survival time:</strong> Time from start of observation until event</p>
+                    <p><strong>Censoring:</strong> Event not observed during study period</p>
+                    <p><strong>Challenge:</strong> Incomplete observations (censoring)</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Medical Example</h4>
+                    <p><strong>Study:</strong> Time until cancer recurrence after treatment</p>
+                    <p><strong>Patients:</strong> 100 patients followed for 5 years</p>
+                    <p><strong>Outcomes:</strong></p>
+                    <ul>
+                        <li>60 patients experienced recurrence (exact times known)</li>
+                        <li>40 patients were censored (lost to follow-up or study ended)</li>
+                    </ul>
+                    <p><strong>Question:</strong> How do we estimate survival probability with incomplete data?</p>
+                </div>
+
+                <div class="censoring-box">
+                    <h4>📊 Types of Censoring</h4>
+                    <ul>
+                        <li><strong>Right censoring:</strong> Most common - know patient survived at least until time t</li>
+                        <li><strong>Left censoring:</strong> Event occurred before observation started</li>
+                        <li><strong>Interval censoring:</strong> Event occurred within a time interval</li>
+                        <li><strong>Random censoring:</strong> Censoring time is random</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Survival Function and Hazard</h2>
+
+                <div class="model-grid">
+                    <div class="survival-box">
+                        <h4>📈 Survival Function</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            S(t) = P(T > t) = 1 - F(t)
+                        </div>
+                        <p><strong>S(t):</strong> Probability of surviving beyond time t</p>
+                        <p><strong>Properties:</strong> S(0) = 1, S(∞) = 0, decreasing</p>
+                    </div>
+
+                    <div class="survival-box">
+                        <h4>⚡ Hazard Function</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            λ(t) = lim_{Δt→0} P(t ≤ T < t+Δt | T ≥ t)/Δt
+                        </div>
+                        <p><strong>λ(t):</strong> Instantaneous risk of event at time t</p>
+                        <p><strong>Interpretation:</strong> Rate of "failure" given survival to time t</p>
+                    </div>
+                </div>
+
+                <div class="survival-box">
+                    <h4>🔗 Relationship Between Functions</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        S(t) = exp(-∫₀ᵗ λ(u) du) = exp(-Λ(t))
+                        <br><br>
+                        λ(t) = -d/dt log S(t) = f(t)/S(t)
+                        <br><br>
+                        Λ(t) = ∫₀ᵗ λ(u) du (cumulative hazard)
+                    </div>
+                    <p><strong>Key insight:</strong> Any one function determines the others!</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>📊 Hazard Patterns</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Pattern</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Constant</strong></td>
+                            <td>λ(t) = λ (exponential distribution)</td>
+                            <td>Random component failures</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Increasing</strong></td>
+                            <td>λ(t) increases with time</td>
+                            <td>Aging, wear-out failures</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decreasing</strong></td>
+                            <td>λ(t) decreases with time</td>
+                            <td>Infant mortality, early failures</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bathtub</strong></td>
+                            <td>High early, low middle, high late</td>
+                            <td>Human mortality, product lifetimes</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Kaplan-Meier Estimator</h2>
+
+                <div class="survival-box">
+                    <h4>🎯 Non-parametric Survival Estimation</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Ŝ(t) = ∏_{tᵢ≤t} (1 - dᵢ/nᵢ)
+                    </div>
+                    <p><strong>dᵢ:</strong> Number of events at time tᵢ</p>
+                    <p><strong>nᵢ:</strong> Number at risk just before tᵢ</p>
+                    <p><strong>Product over all event times ≤ t</strong></p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Kaplan-Meier Calculation</h4>
+                    <p><strong>Data:</strong> 8 patients with times: 2, 3+, 5, 6+, 7, 9, 10+, 12</p>
+                    <p><strong>(+ indicates censoring)</strong></p>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Time</th>
+                            <th>At Risk</th>
+                            <th>Events</th>
+                            <th>Censored</th>
+                            <th>Survival Prob</th>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1.000</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>8</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7/8 = 0.875</td>
+                        </tr>
+                        <tr>
+                            <td>3+</td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0.875</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>6</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.875 × 5/6 = 0.729</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.729 × 3/4 = 0.547</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.547 × 2/3 = 0.365</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.365 × 0/1 = 0.000</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="kaplan-meier">
+                    <h4>📈 Properties of Kaplan-Meier</h4>
+                    <ul>
+                        <li><strong>Step function:</strong> Drops only at observed event times</li>
+                        <li><strong>Right-continuous:</strong> Standard convention</li>
+                        <li><strong>Unbiased:</strong> E[Ŝ(t)] = S(t) under random censoring</li>
+                        <li><strong>Consistent:</strong> Ŝ(t) →ᵖ S(t) as n → ∞</li>
+                        <li><strong>Self-consistent:</strong> Uses only available information</li>
+                    </ul>
+                </div>
+
+                <div class="survival-box">
+                    <h4>📊 Greenwood's Formula (Variance)</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Var(Ŝ(t)) ≈ (Ŝ(t))² ∑_{tᵢ≤t} dᵢ/(nᵢ(nᵢ-dᵢ))
+                    </div>
+                    <p><strong>Use:</strong> Construct confidence intervals for survival curves</p>
+                    <p><strong>95% CI:</strong> Ŝ(t) ± 1.96√Var(Ŝ(t))</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Log-Rank Test</h2>
+
+                <div class="survival-box">
+                    <h4>⚖️ Comparing Survival Curves</h4>
+                    <p><strong>Question:</strong> Do two groups have the same survival distribution?</p>
+                    <p><strong>H₀:</strong> S₁(t) = S₂(t) for all t</p>
+                    <p><strong>H₁:</strong> Survival distributions differ</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Clinical Trial Example</h4>
+                    <p><strong>Study:</strong> New drug vs standard treatment</p>
+                    <p><strong>Data:</strong> Time to disease progression in each group</p>
+                    
+                    <div class="formula-box">
+                        <strong>Test statistic:</strong>
+                        <br>Z = (O₁ - E₁)/√V₁
+                        <br><br>
+                        O₁ = observed events in group 1
+                        <br>E₁ = expected events under H₀
+                        <br>V₁ = variance under H₀
+                    </div>
+                    <p><strong>Under H₀:</strong> Z ~ N(0,1)</p>
+                </div>
+
+                <div class="model-grid">
+                    <div class="model-card">
+                        <h5>💪 Advantages</h5>
+                        <ul>
+                            <li>Most powerful against proportional hazards</li>
+                            <li>Non-parametric (no distribution assumptions)</li>
+                            <li>Handles censoring naturally</li>
+                            <li>Easy to compute and interpret</li>
+                        </ul>
+                    </div>
+
+                    <div class="model-card">
+                        <h5>⚠️ Limitations</h5>
+                        <ul>
+                            <li>Assumes proportional hazards</li>
+                            <li>Less powerful against early differences</li>
+                            <li>Cannot estimate effect size</li>
+                            <li>Only tests difference, not direction</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Cox Proportional Hazards Model</h2>
+
+                <div class="survival-box">
+                    <h4>🎯 Semi-parametric Regression</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        λ(t|x) = λ₀(t) exp(β'x)
+                    </div>
+                    <p><strong>λ₀(t):</strong> Baseline hazard (unspecified)</p>
+                    <p><strong>β'x:</strong> Log relative risk from covariates</p>
+                    <p><strong>Key insight:</strong> Hazard ratio doesn't depend on time!</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Medical Application</h4>
+                    <p><strong>Study:</strong> Factors affecting survival after heart surgery</p>
+                    <div class="formula-box">
+                        λ(t|x) = λ₀(t) exp(β₁×Age + β₂×Sex + β₃×Cholesterol)
+                    </div>
+                    <p><strong>Interpretation:</strong></p>
+                    <ul>
+                        <li>exp(β₁) = hazard ratio for 1-year age increase</li>
+                        <li>exp(β₂) = hazard ratio for male vs female</li>
+                        <li>exp(β₃) = hazard ratio for 1-unit cholesterol increase</li>
+                    </ul>
+                </div>
+
+                <div class="model-grid">
+                    <div class="model-card">
+                        <h5>📊 Proportional Hazards Assumption</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            λ₁(t)/λ₂(t) = exp(β'(x₁-x₂)) = constant
+                        </div>
+                        <p><strong>Means:</strong> Hazard ratio doesn't change over time</p>
+                        <p><strong>Check:</strong> Plot log(-log(S(t))) vs log(t)</p>
+                    </div>
+
+                    <div class="model-card">
+                        <h5>🎯 Partial Likelihood</h5>
+                        <p><strong>Clever idea:</strong> Eliminate nuisance λ₀(t)</p>
+                        <p><strong>Focus on:</strong> Relative risks among those at risk</p>
+                        <p><strong>Result:</strong> Can estimate β without specifying λ₀(t)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Parametric Survival Models</h2>
+
+                <div class="model-grid">
+                    <div class="model-card">
+                        <h5>⏰ Exponential Model</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            λ(t) = λ (constant)
+                            <br>S(t) = exp(-λt)
+                            <br>f(t) = λ exp(-λt)
+                        </div>
+                        <p><strong>Memoryless property:</strong> Constant hazard</p>
+                        <p><strong>Use:</strong> When failure rate is constant</p>
+                    </div>
+
+                    <div class="model-card">
+                        <h5>📈 Weibull Model</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            λ(t) = γλt^(γ-1)
+                            <br>S(t) = exp(-λt^γ)
+                        </div>
+                        <p><strong>γ > 1:</strong> Increasing hazard (aging)</p>
+                        <p><strong>γ < 1:</strong> Decreasing hazard (burn-in)</p>
+                        <p><strong>γ = 1:</strong> Exponential (constant hazard)</p>
+                    </div>
+
+                    <div class="model-card">
+                        <h5>📊 Log-Normal Model</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            log(T) ~ N(μ, σ²)
+                        </div>
+                        <p><strong>Hazard:</strong> Increases then decreases</p>
+                        <p><strong>Use:</strong> When log-transformation makes sense</p>
+                    </div>
+
+                    <div class="model-card">
+                        <h5>📉 Log-Logistic Model</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            λ(t) = γλt^(γ-1)/(1+λt^γ)
+                        </div>
+                        <p><strong>Hazard:</strong> Can increase then decrease</p>
+                        <p><strong>Advantage:</strong> Closed-form survival function</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Model Selection</h4>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Model</th>
+                            <th>Hazard Shape</th>
+                            <th>When to Use</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Exponential</strong></td>
+                            <td>Constant</td>
+                            <td>Random failures, memoryless</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Weibull</strong></td>
+                            <td>Monotonic</td>
+                            <td>Aging or burn-in effects</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Log-normal</strong></td>
+                            <td>Increases then decreases</td>
+                            <td>Fatigue, crack growth</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Log-logistic</strong></td>
+                            <td>Can increase then decrease</td>
+                            <td>Similar to log-normal, easier math</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="model-grid">
+                    <div class="censoring-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Ignoring Censoring</h4>
+                        <p><strong>Problem:</strong> Analyzing only complete cases</p>
+                        <p><strong>Result:</strong> Biased estimates (usually pessimistic)</p>
+                        <p><strong>Solution:</strong> Use appropriate survival methods</p>
+                    </div>
+
+                    <div class="censoring-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Violating Proportional Hazards</h4>
+                        <p><strong>Problem:</strong> Hazard ratios change over time</p>
+                        <p><strong>Check:</strong> Schoenfeld residuals, interaction with time</p>
+                        <p><strong>Solutions:</strong> Stratification, time-varying coefficients</p>
+                    </div>
+
+                    <div class="censoring-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Informative Censoring</h4>
+                        <p><strong>Problem:</strong> Censoring related to outcome</p>
+                        <p><strong>Example:</strong> Sicker patients drop out of study</p>
+                        <p><strong>Solutions:</strong> Competing risks models, sensitivity analysis</p>
+                    </div>
+
+                    <div class="censoring-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Wrong Time Scale</h4>
+                        <p><strong>Problem:</strong> Analysis time vs calendar time</p>
+                        <p><strong>Effect:</strong> Can affect conclusions</p>
+                        <p><strong>Consider:</strong> Age at entry, time since treatment</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Practical Guidelines</h2>
+
+                <div class="kaplan-meier">
+                    <h4>📋 Survival Analysis Workflow</h4>
+                    <ol>
+                        <li><strong>Define endpoints clearly:</strong> What constitutes an event?</li>
+                        <li><strong>Plan follow-up:</strong> Minimize loss to follow-up</li>
+                        <li><strong>Descriptive analysis:</strong> Plot Kaplan-Meier curves</li>
+                        <li><strong>Check assumptions:</strong> Proportional hazards, censoring</li>
+                        <li><strong>Model building:</strong> Start simple, add complexity gradually</li>
+                        <li><strong>Validate models:</strong> Internal and external validation</li>
+                        <li><strong>Clinical interpretation:</strong> Focus on meaningful effects</li>
+                    </ol>
+                </div>
+
+                <div class="survival-box">
+                    <h4>🌟 Key Takeaways</h4>
+                    <ul>
+                        <li><strong>Censoring is the key challenge:</strong> Don't ignore incomplete data</li>
+                        <li><strong>Kaplan-Meier is fundamental:</strong> Non-parametric survival estimation</li>
+                        <li><strong>Cox model is very useful:</strong> Semi-parametric regression</li>
+                        <li><strong>Check assumptions:</strong> Especially proportional hazards</li>
+                        <li><strong>Clinical context matters:</strong> Statistical significance ≠ clinical importance</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Chapters</h2>
+
+                <div class="model-grid">
+                    <div class="example-box">
+                        <h5>📊 To CDF Estimation (Chapter 8)</h5>
+                        <p><strong>Kaplan-Meier:</strong> Empirical CDF with censoring</p>
+                        <p><strong>Connection:</strong> Both estimate distribution functions non-parametrically</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>📈 To Regression (Chapters 14-16)</h5>
+                        <p><strong>Cox model:</strong> Regression extension to survival data</p>
+                        <p><strong>Similar issues:</strong> Model building, diagnostics, interpretation</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>⏰ To Time Series (Chapter 18)</h5>
+                        <p><strong>Duration dependence:</strong> Hazard changes over time</p>
+                        <p><strong>Recurrent events:</strong> Multiple events per subject</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🧠 To Bayesian Inference (Chapter 12)</h5>
+                        <p><strong>Bayesian survival models:</strong> Prior information on parameters</p>
+                        <p><strong>MCMC methods:</strong> Complex survival models</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 18: Time Series</a>
+            <a href="#" class="nav-btn">Chapter 20: Causal Inference →</a>
+        </div>
+    </div>
+</body>
+</html>

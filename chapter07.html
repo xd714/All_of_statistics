@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: Statistical Inference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #a8edea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🎯📊📈🔍📉';
+            position: absolute;
+            top: 50%;
+            left: -30%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: drift 20s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { left: -30%; }
+            100% { left: 130%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: bubble 8s ease-in-out infinite;
+        }
+
+        @keyframes bubble {
+            0%, 100% { transform: translate(20px, 20px) scale(1); }
+            50% { transform: translate(-20px, -20px) scale(1.2); }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .method-card::before {
+            content: '🎯';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0.3;
+        }
+
+        .method-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .method-card h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∂/∂θ';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #26a69a;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∀θ∈Θ';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .property-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #26a69a;
+            box-shadow: 0 5px 15px rgba(38, 166, 154, 0.2);
+        }
+
+        .property-card h5 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .estimator-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .bootstrap-demo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .bootstrap-step {
+            background: rgba(255,255,255,0.2);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid rgba(255,255,255,0.5);
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .property-grid, .estimator-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 7: Statistical Inference</h1>
+            <p>From Data to Decisions: Estimation and Testing</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 What is Statistical Inference?</h2>
+                <p>Statistical inference is the process of using sample data to make conclusions about population parameters. It's the bridge between data and decision-making!</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Real-World Example</h4>
+                    <p><strong>Drug Trial:</strong> Test new medication on 1000 patients, observe 85% improvement rate</p>
+                    <p><strong>Questions:</strong></p>
+                    <ul>
+                        <li>What's our best estimate of the true improvement rate?</li>
+                        <li>How confident can we be in this estimate?</li>
+                        <li>Is this significantly better than the 75% rate of current treatment?</li>
+                    </ul>
+                    <p><strong>Statistical inference provides the tools to answer these questions!</strong></p>
+                </div>
+
+                <div class="property-grid">
+                    <div class="property-card">
+                        <h5>🎯 Point Estimation</h5>
+                        <p>Find single "best guess" for unknown parameter</p>
+                        <p><strong>Example:</strong> Sample mean X̄ estimates population mean μ</p>
+                    </div>
+                    <div class="property-card">
+                        <h5>📏 Interval Estimation</h5>
+                        <p>Find range of plausible values for parameter</p>
+                        <p><strong>Example:</strong> 95% confidence interval</p>
+                    </div>
+                    <div class="property-card">
+                        <h5>🧪 Hypothesis Testing</h5>
+                        <p>Test claims about population parameters</p>
+                        <p><strong>Example:</strong> Is new drug better than old?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Point Estimation</h2>
+
+                <h3>Properties of Estimators</h3>
+                <div class="property-grid">
+                    <div class="property-card">
+                        <h5>🎯 Unbiasedness</h5>
+                        <div class="formula-box" style="font-size: 0.9em;">
+                            E[θ̂] = θ
+                        </div>
+                        <p>Estimator hits the target on average</p>
+                        <p><strong>Example:</strong> Sample mean is unbiased for population mean</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h5>🔒 Consistency</h5>
+                        <div class="formula-box" style="font-size: 0.9em;">
+                            θ̂ₙ →ᵖ θ
+                        </div>
+                        <p>Estimator gets closer to truth as n increases</p>
+                        <p><strong>Good news:</strong> Most reasonable estimators are consistent</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h5>⚡ Efficiency</h5>
+                        <div class="formula-box" style="font-size: 0.9em;">
+                            Var(θ̂) = minimum possible
+                        </div>
+                        <p>Among unbiased estimators, has smallest variance</p>
+                        <p><strong>Gold standard:</strong> Achieves Cramér-Rao lower bound</p>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🏆 Cramér-Rao Lower Bound</h4>
+                    <p>For any unbiased estimator θ̂ of parameter θ:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Var(θ̂) ≥ 1/I(θ)
+                    </div>
+                    <p>where I(θ) is the Fisher Information:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        I(θ) = E[(∂log f/∂θ)²] = -E[∂²log f/∂θ²]
+                    </div>
+                    <p><strong>Interpretation:</strong> There's a fundamental limit to how precisely we can estimate!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Methods of Estimation</h2>
+
+                <div class="estimator-comparison">
+                    <div class="method-card">
+                        <h4>📊 Method of Moments</h4>
+                        <p><strong>Idea:</strong> Equate sample moments to population moments</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            (1/n)∑Xᵢᵏ = E[Xᵏ]
+                        </div>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Simple and intuitive</li>
+                            <li>Always exists</li>
+                            <li>Consistent under mild conditions</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>May not be efficient</li>
+                            <li>Can give nonsensical answers</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-card">
+                        <h4>🎯 Maximum Likelihood</h4>
+                        <p><strong>Idea:</strong> Find parameter that makes observed data most likely</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            θ̂ₘₗₑ = argmax L(θ) = argmax ∏f(xᵢ; θ)
+                        </div>
+                        <p><strong>Pros:</strong></p>
+                        <ul>
+                            <li>Asymptotically efficient</li>
+                            <li>Invariant under reparameterization</li>
+                            <li>Asymptotically normal</li>
+                        </ul>
+                        <p><strong>Cons:</strong></p>
+                        <ul>
+                            <li>May not have closed form</li>
+                            <li>Can be biased in small samples</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-card">
+                        <h4>📐 Least Squares</h4>
+                        <p><strong>Idea:</strong> Minimize sum of squared residuals</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            θ̂ₗₛ = argmin ∑(yᵢ - g(xᵢ; θ))²
+                        </div>
+                        <p><strong>Special case:</strong> Linear regression</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            β̂ = (X'X)⁻¹X'Y
+                        </div>
+                        <p><strong>Advantages:</strong></p>
+                        <ul>
+                            <li>Closed form solution (linear case)</li>
+                            <li>BLUE under Gauss-Markov conditions</li>
+                            <li>Doesn't require distributional assumptions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Maximum Likelihood in Detail</h2>
+
+                <div class="theorem-box">
+                    <h4>🌟 Asymptotic Properties of MLE</h4>
+                    <p>Under regularity conditions, the MLE θ̂ₘₗₑ has:</p>
+                    <ol>
+                        <li><strong>Consistency:</strong> θ̂ₘₗₑ →ᵖ θ₀</li>
+                        <li><strong>Asymptotic Normality:</strong> √n(θ̂ₘₗₑ - θ₀) ⇒ N(0, I⁻¹(θ₀))</li>
+                        <li><strong>Efficiency:</strong> Achieves Cramér-Rao bound asymptotically</li>
+                        <li><strong>Invariance:</strong> If θ̂ is MLE of θ, then g(θ̂) is MLE of g(θ)</li>
+                    </ol>
+                </div>
+
+                <div class="example-box">
+                    <h4>🪙 Example: Binomial Parameter</h4>
+                    <p><strong>Setup:</strong> X₁, ..., Xₙ ~ Bernoulli(p), want to estimate p</p>
+                    <p><strong>Likelihood:</strong></p>
+                    <div class="formula-box">
+                        L(p) = ∏pˣⁱ(1-p)¹⁻ˣⁱ = p^∑xᵢ(1-p)ⁿ⁻^∑xᵢ
+                    </div>
+                    <p><strong>Log-likelihood:</strong></p>
+                    <div class="formula-box">
+                        ℓ(p) = (∑xᵢ)log p + (n-∑xᵢ)log(1-p)
+                    </div>
+                    <p><strong>Score function:</strong></p>
+                    <div class="formula-box">
+                        ∂ℓ/∂p = ∑xᵢ/p - (n-∑xᵢ)/(1-p) = 0
+                    </div>
+                    <p><strong>MLE solution:</strong></p>
+                    <div class="formula-box">
+                        p̂ₘₗₑ = (∑xᵢ)/n = X̄
+                    </div>
+                    <p><strong>Result:</strong> Sample proportion is MLE! (And it's unbiased and efficient)</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📏 Confidence Intervals</h2>
+
+                <div class="theorem-box">
+                    <h4>🎯 Definition</h4>
+                    <p>A <span class="highlight">confidence interval</span> [L(X), U(X)] has <span class="highlight">coverage probability</span>:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(L(X) ≤ θ ≤ U(X)) ≥ 1 - α for all θ ∈ Θ
+                    </div>
+                    <p><strong>Interpretation:</strong> In repeated sampling, (1-α)×100% of intervals contain the true parameter</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🌡️ Normal Mean Example (σ known)</h4>
+                    <p><strong>Setup:</strong> X₁, ..., Xₙ ~ N(μ, σ²), σ known, want CI for μ</p>
+                    <p><strong>Pivotal quantity:</strong></p>
+                    <div class="formula-box">
+                        Z = (X̄ - μ)/(σ/√n) ~ N(0,1)
+                    </div>
+                    <p><strong>Probability statement:</strong></p>
+                    <div class="formula-box">
+                        P(-z_{α/2} ≤ Z ≤ z_{α/2}) = 1 - α
+                    </div>
+                    <p><strong>Rearranging:</strong></p>
+                    <div class="formula-box">
+                        P(X̄ - z_{α/2}σ/√n ≤ μ ≤ X̄ + z_{α/2}σ/√n) = 1 - α
+                    </div>
+                    <p><strong>95% CI:</strong> X̄ ± 1.96σ/√n</p>
+                </div>
+
+                <div class="property-grid">
+                    <div class="property-card">
+                        <h5>📐 Pivotal Method</h5>
+                        <p>Find quantity Q(X,θ) with known distribution</p>
+                        <p>Invert probability statement to get CI</p>
+                    </div>
+                    <div class="property-card">
+                        <h5>🎯 Asymptotic CIs</h5>
+                        <p>Use CLT: θ̂ ≈ N(θ, σ²/n)</p>
+                        <p>CI: θ̂ ± z_{α/2}σ̂/√n</p>
+                    </div>
+                    <div class="property-card">
+                        <h5>📊 Likelihood-based</h5>
+                        <p>Use asymptotic distribution of likelihood ratio</p>
+                        <p>More complex but very general</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔄 Bootstrap Methods</h2>
+
+                <div class="bootstrap-demo">
+                    <h4>🎯 Bootstrap Principle</h4>
+                    <p><strong>"The bootstrap is a computer-based method for assigning measures of accuracy to statistical estimates"</strong></p>
+                    
+                    <div class="bootstrap-step">
+                        <strong>Step 1:</strong> Resample with replacement from original data
+                    </div>
+                    <div class="bootstrap-step">
+                        <strong>Step 2:</strong> Calculate statistic for each bootstrap sample
+                    </div>
+                    <div class="bootstrap-step">
+                        <strong>Step 3:</strong> Use distribution of bootstrap statistics to estimate sampling distribution
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Bootstrap Confidence Interval</h4>
+                    <p><strong>Original sample:</strong> {x₁, x₂, ..., xₙ}</p>
+                    <p><strong>Bootstrap samples:</strong> {x₁*, x₂*, ..., xₙ*} (sampled with replacement)</p>
+                    <p><strong>Bootstrap statistics:</strong> T₁*, T₂*, ..., T_B*</p>
+                    <p><strong>Percentile CI:</strong> [T*_{(α/2)}, T*_{(1-α/2)}]</p>
+                    
+                    <div class="formula-box">
+                        <strong>Example with B = 1000 bootstrap samples:</strong>
+                        <br>95% CI = [T*₍₂₅₎, T*₍₉₇₅₎]
+                        <br>(25th and 975th order statistics)
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎯 When Bootstrap Works</h4>
+                    <p><strong>Advantages:</strong></p>
+                    <ul>
+                        <li>No distributional assumptions</li>
+                        <li>Works for complex statistics</li>
+                        <li>Provides automatic bias correction</li>
+                        <li>Easy to implement</li>
+                    </ul>
+                    <p><strong>Limitations:</strong></p>
+                    <ul>
+                        <li>Computationally intensive</li>
+                        <li>May fail for extreme order statistics</li>
+                        <li>Assumes sample is representative</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Sufficient Statistics</h2>
+
+                <div class="theorem-box">
+                    <h4>🎯 Definition and Intuition</h4>
+                    <p>T(X) is <span class="highlight">sufficient</span> for θ if the conditional distribution of X given T(X) doesn't depend on θ</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(X = x | T(X) = t, θ) doesn't depend on θ
+                    </div>
+                    <p><strong>Intuition:</strong> T(X) contains all the information about θ that's in the data!</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📋 Factorization Theorem</h4>
+                    <p>T(X) is sufficient for θ if and only if:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        f(x; θ) = g(T(x); θ) × h(x)
+                    </div>
+                    <p>where g depends on θ and h doesn't.</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔔 Normal Distribution Example</h4>
+                    <p><strong>Case 1:</strong> μ unknown, σ² known</p>
+                    <p><strong>Sufficient statistic:</strong> T(X) = X̄ (sample mean)</p>
+                    
+                    <p><strong>Case 2:</strong> Both μ and σ² unknown</p>
+                    <p><strong>Sufficient statistic:</strong> T(X) = (X̄, ∑Xᵢ²) (mean and sum of squares)</p>
+                    
+                    <div class="formula-box">
+                        <strong>Why sufficient?</strong> All we need from the data to estimate μ and σ² 
+                        are the sample mean and sample variance!
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🏆 Rao-Blackwell Theorem</h4>
+                    <p>If T is sufficient and θ̂ is unbiased, then:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        θ̂* = E[θ̂|T] is unbiased with Var(θ̂*) ≤ Var(θ̂)
+                    </div>
+                    <p><strong>Message:</strong> We can always improve an estimator by conditioning on a sufficient statistic!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Completeness and Optimality</h2>
+
+                <div class="theorem-box">
+                    <h4>🔒 Complete Statistics</h4>
+                    <p>T is <span class="highlight">complete</span> if E[g(T)] = 0 for all θ implies g(T) = 0 almost surely</p>
+                    <p><strong>Intuition:</strong> No non-trivial function of T has expected value zero</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🏆 Lehmann-Scheffé Theorem</h4>
+                    <p>If T is complete and sufficient, and θ̂ is unbiased, then E[θ̂|T] is the unique UMVU estimator</p>
+                    <p><strong>UMVU:</strong> Uniformly Minimum Variance Unbiased</p>
+                    <p><strong>Practical importance:</strong> Gives us the "best" unbiased estimator!</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>📊 Exponential Family</h4>
+                    <p>For canonical exponential families:</p>
+                    <div class="formula-box">
+                        f(x; θ) = h(x)exp{θᵀT(x) - A(θ)}
+                    </div>
+                    <ul>
+                        <li><strong>T(X) is sufficient</strong></li>
+                        <li><strong>T(X) is complete</strong> (if parameter space contains open set)</li>
+                        <li><strong>∇A(θ) is UMVU estimator</strong> of E[T(X)]</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧪 Hypothesis Testing Preview</h2>
+
+                <div class="example-box">
+                    <h4>🎯 Basic Framework</h4>
+                    <p><strong>Null hypothesis H₀:</strong> Default assumption (e.g., "no effect")</p>
+                    <p><strong>Alternative hypothesis H₁:</strong> What we're testing for</p>
+                    <p><strong>Test statistic:</strong> Function of data that helps decide</p>
+                    <p><strong>p-value:</strong> Probability of observing data this extreme if H₀ is true</p>
+                    <p><strong>Decision rule:</strong> Reject H₀ if p-value < α (significance level)</p>
+                </div>
+
+                <div class="property-grid">
+                    <div class="property-card">
+                        <h5>❌ Type I Error</h5>
+                        <p>Reject H₀ when it's true</p>
+                        <p><strong>Probability:</strong> α (significance level)</p>
+                        <p><strong>Example:</strong> False positive in medical test</p>
+                    </div>
+                    <div class="property-card">
+                        <h5>❌ Type II Error</h5>
+                        <p>Fail to reject H₀ when it's false</p>
+                        <p><strong>Probability:</strong> β</p>
+                        <p><strong>Power:</strong> 1 - β (probability of correctly rejecting H₀)</p>
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Reality / Decision</th>
+                        <th>Reject H₀</th>
+                        <th>Fail to Reject H₀</th>
+                    </tr>
+                    <tr>
+                        <td><strong>H₀ True</strong></td>
+                        <td style="background: #ffebee;">Type I Error (α)</td>
+                        <td style="background: #e8f5e8;">Correct Decision</td>
+                    </tr>
+                    <tr>
+                        <td><strong>H₁ True</strong></td>
+                        <td style="background: #e8f5e8;">Correct Decision (Power)</td>
+                        <td style="background: #ffebee;">Type II Error (β)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Computational Methods</h2>
+
+                <div class="property-grid">
+                    <div class="method-card">
+                        <h4>🎯 Newton-Raphson</h4>
+                        <p><strong>For finding MLEs when no closed form exists</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            θ⁽ᵏ⁺¹⁾ = θ⁽ᵏ⁾ - H⁻¹(θ⁽ᵏ⁾)S(θ⁽ᵏ⁾)
+                        </div>
+                        <p>where S is score function, H is Hessian</p>
+                        <p><strong>Advantage:</strong> Quadratic convergence</p>
+                        <p><strong>Issue:</strong> May not converge if starting point is poor</p>
+                    </div>
+
+                    <div class="method-card">
+                        <h4>📊 EM Algorithm</h4>
+                        <p><strong>For models with missing/latent data</strong></p>
+                        <div class="bootstrap-step">
+                            <strong>E-step:</strong> Compute Q(θ|θ⁽ᵏ⁾) = E[log L(θ|X,Z)|X,θ⁽ᵏ⁾]
+                        </div>
+                        <div class="bootstrap-step">
+                            <strong>M-step:</strong> θ⁽ᵏ⁺¹⁾ = argmax Q(θ|θ⁽ᵏ⁾)
+                        </div>
+                        <p><strong>Examples:</strong> Mixture models, factor analysis, HMMs</p>
+                        <p><strong>Guarantee:</strong> Likelihood increases at each step</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="property-grid">
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Confusing estimator and estimate</h4>
+                        <p><strong>Estimator:</strong> Random variable (function of data)</p>
+                        <p><strong>Estimate:</strong> Realized value for specific dataset</p>
+                        <p><strong>Example:</strong> X̄ is estimator, x̄ = 5.2 is estimate</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Misinterpreting confidence intervals</h4>
+                        <p><strong>Wrong:</strong> "95% probability parameter is in this interval"</p>
+                        <p><strong>Right:</strong> "95% of such intervals contain the parameter"</p>
+                        <p><strong>Key:</strong> Interval is random, parameter is fixed!</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Ignoring bias-variance tradeoff</h4>
+                        <p><strong>MSE = Bias² + Variance</strong></p>
+                        <p>Sometimes a slightly biased estimator with much lower variance is better!</p>
+                        <p><strong>Example:</strong> Shrinkage estimators in high dimensions</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Applying asymptotic results too early</h4>
+                        <p>Large sample properties may not hold for small n</p>
+                        <p><strong>Example:</strong> MLE may be biased in small samples</p>
+                        <p><strong>Solution:</strong> Check finite-sample properties when possible</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Looking Ahead</h2>
+
+                <div class="example-box">
+                    <h4>🚀 What's Next?</h4>
+                    <p>This chapter provided the foundation. Coming up:</p>
+                    <ul>
+                        <li><strong>Chapter 8:</strong> Estimating CDFs and distribution-free methods</li>
+                        <li><strong>Chapter 9:</strong> Bootstrap in detail</li>
+                        <li><strong>Chapter 10-11:</strong> Hypothesis testing theory and practice</li>
+                        <li><strong>Chapter 12:</strong> Bayesian approach to inference</li>
+                    </ul>
+                    <p><strong>Key insight:</strong> Most of modern statistics builds on these fundamental concepts!</p>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎯 Big Picture</h4>
+                    <p><strong>Frequentist paradigm:</strong> Parameters are fixed, data is random</p>
+                    <p><strong>Goal:</strong> Find procedures with good long-run properties</p>
+                    <p><strong>Tools:</strong> Unbiasedness, consistency, efficiency, coverage probability</p>
+                    <p><strong>Philosophy:</strong> "What would happen if we repeated this many times?"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 6: Convergence</a>
+            <a href="#" class="nav-btn">Chapter 8: CDF Estimation →</a>
+        </div>
+    </div>
+</body>
+</html>

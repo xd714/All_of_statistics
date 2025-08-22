@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 14: Linear Regression</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 50%, #4ecdc4 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: 'ŷ=β₀+β₁x+ε';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #4ecdc4;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(78,205,196,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #4ecdc4;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .regression-concept {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .regression-concept::before {
+            content: '📊';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .regression-concept:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4);
+        }
+
+        .regression-concept h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∑';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∀';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .assumption-box {
+            background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(255, 118, 117, 0.3);
+        }
+
+        .assumption-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .anova-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .anova-table th {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .anova-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .anova-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #f39c12;
+            text-align: center;
+        }
+
+        .method-comparison {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .method-comparison .arrow {
+            color: #e67e22;
+            font-size: 2em;
+        }
+
+        .method-item {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .method-item:hover {
+            transform: scale(1.05);
+        }
+
+        .diagnostic-box {
+            background: linear-gradient(135deg, #00cec9 0%, #00b894 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(0, 206, 201, 0.3);
+        }
+
+        .diagnostic-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .regularization-visual {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .reg-methods {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .reg-method {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 180px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .reg-method:hover {
+            transform: translateY(-5px);
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .method-comparison {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 14: Linear Regression</h1>
+            <p>The Foundation of Statistical Modeling</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Why Linear Regression?</h2>
+                <p>Linear regression is the <strong>cornerstone of statistical modeling</strong>! It's simple, interpretable, and forms the foundation for understanding relationships between variables.</p>
+                
+                <div class="example-box">
+                    <h4>🏠 Real-World Example: House Prices</h4>
+                    <p><strong>Question:</strong> How does house size affect price?</p>
+                    <p><strong>Model:</strong> Price = β₀ + β₁ × Size + ε</p>
+                    <p><strong>Interpretation:</strong> β₁ = expected price increase per square foot</p>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>📈 The Regression Line</h4>
+                    <p>We're finding the "best" line through a scatter plot of data points</p>
+                    <div class="method-comparison">
+                        <span class="method-item">Data Points</span>
+                        <span class="arrow">→</span>
+                        <span class="method-item">Best Fit Line</span>
+                        <span class="arrow">→</span>
+                        <span class="method-item">Predictions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏗️ The Linear Model</h2>
+
+                <div class="regression-concept">
+                    <h4>📊 Simple Linear Regression</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        Y = β₀ + β₁X + ε
+                    </div>
+                    <p><strong>Components:</strong></p>
+                    <ul>
+                        <li><strong>Y:</strong> Response variable (what we want to predict)</li>
+                        <li><strong>X:</strong> Predictor variable (what we use to predict)</li>
+                        <li><strong>β₀:</strong> Intercept (Y when X = 0)</li>
+                        <li><strong>β₁:</strong> Slope (change in Y per unit change in X)</li>
+                        <li><strong>ε:</strong> Error term (what we can't explain)</li>
+                    </ul>
+                </div>
+
+                <div class="regression-concept">
+                    <h4>🔢 Matrix Form</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        Y = Xβ + ε
+                    </div>
+                    <p><strong>Where:</strong> X is n×p design matrix, β is parameter vector</p>
+                </div>
+
+                <div class="assumption-box">
+                    <h4>⚠️ Key Assumptions (LINE)</h4>
+                    <ul>
+                        <li><strong>L</strong>inearity: E[Y|X] = β₀ + β₁X</li>
+                        <li><strong>I</strong>ndependence: Errors are independent</li>
+                        <li><strong>N</strong>ormality: ε ~ N(0, σ²)</li>
+                        <li><strong>E</strong>qual variance: Var(ε) = σ² (homoscedasticity)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Ordinary Least Squares (OLS)</h2>
+
+                <div class="theorem-box">
+                    <h4>🏆 The Least Squares Principle</h4>
+                    <p>Find β that minimizes the sum of squared residuals:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        min Σᵢ(Yᵢ - β₀ - β₁Xᵢ)²
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="regression-concept">
+                        <h4>📐 OLS Estimators</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            β̂₁ = Σᵢ(Xᵢ-X̄)(Yᵢ-Ȳ) / Σᵢ(Xᵢ-X̄)²
+                            <br>β̂₀ = Ȳ - β̂₁X̄
+                        </div>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>🔢 Matrix Solution</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            β̂ = (X'X)⁻¹X'Y
+                        </div>
+                        <p><strong>The Normal Equations:</strong> X'Xβ̂ = X'Y</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🧮 Why "Least Squares"?</h4>
+                    <p><strong>Residuals:</strong> êᵢ = Yᵢ - Ŷᵢ (observed - predicted)</p>
+                    <p><strong>Goal:</strong> Make residuals as small as possible</p>
+                    <p><strong>Why square them?</strong> Prevents positive and negative residuals from canceling out!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏆 Properties of OLS Estimators</h2>
+
+                <div class="theorem-box">
+                    <h4>🌟 Gauss-Markov Theorem</h4>
+                    <p>Under assumptions 1-3 (no normality needed), OLS estimators are <strong>BLUE</strong>:</p>
+                    <ul>
+                        <li><strong>B</strong>est: Minimum variance among all linear unbiased estimators</li>
+                        <li><strong>L</strong>inear: Linear combinations of Y values</li>
+                        <li><strong>U</strong>nbiased: E[β̂] = β</li>
+                        <li><strong>E</strong>stimators: Functions of the data</li>
+                    </ul>
+                </div>
+
+                <div class="grid-2">
+                    <div class="regression-concept">
+                        <h4>🎯 Unbiasedness</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            E[β̂] = β
+                        </div>
+                        <p><strong>Meaning:</strong> On average, we get the right answer!</p>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>📊 Variance</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Var(β̂) = σ²(X'X)⁻¹
+                        </div>
+                        <p><strong>For simple regression:</strong> Var(β̂₁) = σ²/Σ(Xᵢ-X̄)²</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>💡 Key Insights</h4>
+                    <ul>
+                        <li><strong>More spread in X → smaller variance:</strong> Better to have X values spread out</li>
+                        <li><strong>Larger sample size → smaller variance:</strong> More data is better</li>
+                        <li><strong>Smaller σ² → smaller variance:</strong> Less noise is better</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Analysis of Variance (ANOVA)</h2>
+
+                <div class="theorem-box">
+                    <h4>🔍 Decomposing Variation</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Total Variation = Explained Variation + Unexplained Variation
+                        <br>TSS = ESS + RSS
+                    </div>
+                </div>
+
+                <table class="anova-table">
+                    <tr>
+                        <th>Source</th>
+                        <th>df</th>
+                        <th>Sum of Squares</th>
+                        <th>Mean Square</th>
+                        <th>F-ratio</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Regression</strong></td>
+                        <td>p-1</td>
+                        <td>ESS = Σ(Ŷᵢ - Ȳ)²</td>
+                        <td>MSR = ESS/(p-1)</td>
+                        <td>F = MSR/MSE</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Error</strong></td>
+                        <td>n-p</td>
+                        <td>RSS = Σ(Yᵢ - Ŷᵢ)²</td>
+                        <td>MSE = RSS/(n-p)</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td>n-1</td>
+                        <td>TSS = Σ(Yᵢ - Ȳ)²</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <div class="regression-concept">
+                    <h4>📈 R-squared (Coefficient of Determination)</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        R² = ESS/TSS = 1 - RSS/TSS
+                    </div>
+                    <p><strong>Interpretation:</strong> Proportion of variance in Y explained by X</p>
+                    <p><strong>Range:</strong> 0 ≤ R² ≤ 1 (higher is better fit)</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Interpreting R²</h4>
+                    <ul>
+                        <li><strong>R² = 0.8:</strong> 80% of variation in Y explained by the model</li>
+                        <li><strong>R² = 0.3:</strong> Only 30% explained - lots of unexplained variation</li>
+                        <li><strong>R² = 1:</strong> Perfect fit (probably overfitting!)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔬 Statistical Inference</h2>
+
+                <div class="theorem-box">
+                    <h4>📊 Sampling Distributions (with normality)</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        β̂ ~ N(β, σ²(X'X)⁻¹)
+                        <br>(n-p)σ̂²/σ² ~ χ²_{n-p}
+                        <br>β̂ and σ̂² are independent
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="regression-concept">
+                        <h4>🎯 t-tests for Individual Parameters</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            t = β̂ⱼ/se(β̂ⱼ) ~ t_{n-p}
+                        </div>
+                        <p><strong>H₀:</strong> βⱼ = 0 (no effect)</p>
+                        <p><strong>H₁:</strong> βⱼ ≠ 0 (significant effect)</p>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>📈 Confidence Intervals</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            β̂ⱼ ± t_{n-p,α/2} × se(β̂ⱼ)
+                        </div>
+                        <p><strong>Interpretation:</strong> Range of plausible values for βⱼ</p>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🔍 F-test for Overall Significance</h4>
+                    <p><strong>H₀:</strong> β₁ = β₂ = ... = βₚ₋₁ = 0 (no relationship)</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        F = MSR/MSE ~ F_{p-1,n-p}
+                    </div>
+                    <p><strong>Tests:</strong> Is the overall model significant?</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Model Diagnostics</h2>
+
+                <div class="diagnostic-box">
+                    <h4>🩺 Checking Assumptions</h4>
+                    <p>Even the best model is useless if assumptions are violated!</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="regression-concept">
+                        <h4>📊 Residual Plots</h4>
+                        <ul>
+                            <li><strong>vs Fitted values:</strong> Check linearity, homoscedasticity</li>
+                            <li><strong>vs Each predictor:</strong> Check linearity for each X</li>
+                            <li><strong>Normal Q-Q plot:</strong> Check normality</li>
+                            <li><strong>vs Order:</strong> Check independence (time series)</li>
+                        </ul>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>🎯 What to Look For</h4>
+                        <ul>
+                            <li><strong>Random scatter:</strong> Good!</li>
+                            <li><strong>Patterns/curves:</strong> Nonlinearity</li>
+                            <li><strong>Funnel shape:</strong> Heteroscedasticity</li>
+                            <li><strong>Outliers:</strong> Influential points</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🚨 Common Problems and Solutions</h4>
+                    <ul>
+                        <li><strong>Nonlinearity:</strong> Transform variables, add polynomial terms</li>
+                        <li><strong>Heteroscedasticity:</strong> Weighted least squares, transform Y</li>
+                        <li><strong>Non-normality:</strong> Transform Y, use robust methods</li>
+                        <li><strong>Outliers:</strong> Investigate, consider removal or robust methods</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Multiple Regression</h2>
+
+                <div class="regression-concept">
+                    <h4>📊 The Multiple Regression Model</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        Y = β₀ + β₁X₁ + β₂X₂ + ... + βₚ₋₁Xₚ₋₁ + ε
+                    </div>
+                    <p><strong>Key insight:</strong> Each βⱼ is the effect of Xⱼ <em>holding all other variables constant</em></p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏠 Multiple Regression Example</h4>
+                    <p><strong>Model:</strong> House Price = β₀ + β₁×Size + β₂×Bedrooms + β₃×Age + ε</p>
+                    <p><strong>Interpretation of β₁:</strong> Expected change in price per square foot, holding bedrooms and age constant</p>
+                </div>
+
+                <div class="assumption-box">
+                    <h4>⚠️ New Challenge: Multicollinearity</h4>
+                    <p><strong>Problem:</strong> When predictors are highly correlated</p>
+                    <p><strong>Detection:</strong> Variance Inflation Factor (VIF)</p>
+                    <div class="formula-box">
+                        VIFⱼ = 1/(1 - R²ⱼ)
+                    </div>
+                    <p><strong>Rule of thumb:</strong> VIF > 10 indicates problematic multicollinearity</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Model Selection</h2>
+
+                <div class="visual-demo">
+                    <h4>🤔 The Model Selection Problem</h4>
+                    <div class="method-comparison">
+                        <span class="method-item">Too few variables</span>
+                        <span class="arrow">vs</span>
+                        <span class="method-item">Too many variables</span>
+                    </div>
+                    <p><strong>Underfitting vs Overfitting!</strong></p>
+                </div>
+
+                <div class="grid-3">
+                    <div class="regression-concept">
+                        <h4>➡️ Forward Selection</h4>
+                        <ol>
+                            <li>Start with no variables</li>
+                            <li>Add variable that most improves fit</li>
+                            <li>Stop when no improvement</li>
+                        </ol>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>⬅️ Backward Elimination</h4>
+                        <ol>
+                            <li>Start with all variables</li>
+                            <li>Remove least significant variable</li>
+                            <li>Stop when all remaining significant</li>
+                        </ol>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>↔️ Stepwise Selection</h4>
+                        <p>Combination of forward and backward</p>
+                        <p><strong>Can add and remove variables</strong></p>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📊 Information Criteria</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        AIC = n ln(RSS/n) + 2p
+                        <br>BIC = n ln(RSS/n) + p ln(n)
+                    </div>
+                    <p><strong>Goal:</strong> Balance fit and complexity (lower is better)</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏗️ Regularization Methods</h2>
+
+                <div class="regularization-visual">
+                    <h2>🎯 When p is Large</h2>
+                    <p>Traditional OLS can overfit. <strong>Regularization</strong> adds penalties to prevent this!</p>
+                </div>
+
+                <div class="reg-methods">
+                    <div class="reg-method">
+                        <h4>🔵 Ridge Regression</h4>
+                        <div class="formula-box">
+                            min RSS + λΣβⱼ²
+                        </div>
+                        <p><strong>Effect:</strong> Shrinks coefficients toward zero</p>
+                        <p><strong>Keeps all variables</strong></p>
+                    </div>
+
+                    <div class="reg-method">
+                        <h4>🔶 LASSO</h4>
+                        <div class="formula-box">
+                            min RSS + λΣ|βⱼ|
+                        </div>
+                        <p><strong>Effect:</strong> Sets some coefficients exactly to zero</p>
+                        <p><strong>Automatic variable selection</strong></p>
+                    </div>
+
+                    <div class="reg-method">
+                        <h4>🟣 Elastic Net</h4>
+                        <div class="formula-box">
+                            min RSS + λ₁Σ|βⱼ| + λ₂Σβⱼ²
+                        </div>
+                        <p><strong>Effect:</strong> Combines Ridge and LASSO</p>
+                        <p><strong>Best of both worlds</strong></p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 When to Use Which?</h4>
+                    <ul>
+                        <li><strong>Ridge:</strong> When you think most variables are relevant</li>
+                        <li><strong>LASSO:</strong> When you think only a few variables are relevant</li>
+                        <li><strong>Elastic Net:</strong> When you're not sure, or have grouped variables</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Cross-Validation</h2>
+
+                <div class="theorem-box">
+                    <h4>🔍 The Gold Standard for Model Evaluation</h4>
+                    <p><strong>Problem:</strong> Training error underestimates true prediction error</p>
+                    <p><strong>Solution:</strong> Use separate data for training and testing!</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="regression-concept">
+                        <h4>📋 k-fold Cross-Validation</h4>
+                        <ol>
+                            <li>Divide data into k folds</li>
+                            <li>For each fold:
+                                <ul>
+                                    <li>Train on k-1 folds</li>
+                                    <li>Test on remaining fold</li>
+                                </ul>
+                            </li>
+                            <li>Average the k test errors</li>
+                        </ol>
+                    </div>
+
+                    <div class="regression-concept">
+                        <h4>🎯 Leave-One-Out CV (LOOCV)</h4>
+                        <p><strong>Special case:</strong> k = n</p>
+                        <p><strong>For linear regression:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            CV = (1/n)Σᵢ(êᵢ/(1-hᵢᵢ))²
+                        </div>
+                        <p><strong>Advantage:</strong> No need to refit n times!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="grid-2">
+                    <div class="assumption-box">
+                        <h4>❌ Correlation ≠ Causation</h4>
+                        <p><strong>Problem:</strong> Regression shows association, not causation</p>
+                        <p><strong>Example:</strong> Ice cream sales correlate with drownings</p>
+                        <p><strong>Reality:</strong> Both caused by hot weather!</p>
+                    </div>
+
+                    <div class="assumption-box">
+                        <h4>❌ Extrapolation Dangers</h4>
+                        <p><strong>Problem:</strong> Predictions outside the range of X</p>
+                        <p><strong>Why dangerous:</strong> Relationship might change</p>
+                        <p><strong>Example:</strong> Predicting income for 20-year education when data only goes to 16 years</p>
+                    </div>
+                </div>
+
+                <div class="assumption-box">
+                    <h4>❌ Simpson's Paradox</h4>
+                    <p><strong>Problem:</strong> Relationship can reverse when you add/remove variables</p>
+                    <p><strong>Example:</strong> University admission rates by gender</p>
+                    <p><strong>Solution:</strong> Think carefully about confounding variables</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="assumption-box">
+                        <h4>❌ Overfitting</h4>
+                        <p><strong>Problem:</strong> Model fits training data too well</p>
+                        <p><strong>Result:</strong> Poor prediction on new data</p>
+                        <p><strong>Solution:</strong> Cross-validation, regularization</p>
+                    </div>
+
+                    <div class="assumption-box">
+                        <h4>❌ Ignoring Assumptions</h4>
+                        <p><strong>Problem:</strong> Using OLS when assumptions violated</p>
+                        <p><strong>Result:</strong> Invalid inference</p>
+                        <p><strong>Solution:</strong> Always check diagnostics!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Chapters</h2>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>📊 To Inequalities (Chapter 5)</h4>
+                        <ul>
+                            <li><strong>Concentration bounds:</strong> For large sample properties</li>
+                            <li><strong>Tail bounds:</strong> For outlier detection</li>
+                            <li><strong>High-dimensional:</strong> LASSO theory</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Convergence (Chapter 6)</h4>
+                        <ul>
+                            <li><strong>Consistency:</strong> β̂ₙ →ᵖ β</li>
+                            <li><strong>Asymptotic normality:</strong> √n(β̂ₙ - β) ⇒ N(0,V)</li>
+                            <li><strong>Central limit theorem:</strong> Foundation for inference</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🔬 To Hypothesis Testing (Chapter 11)</h4>
+                        <ul>
+                            <li><strong>t-tests:</strong> Testing individual coefficients</li>
+                            <li><strong>F-tests:</strong> Testing multiple coefficients</li>
+                            <li><strong>Model comparison:</strong> Nested model tests</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🎯 To Logistic Regression (Chapter 16)</h4>
+                        <ul>
+                            <li><strong>Extension:</strong> From continuous to binary outcomes</li>
+                            <li><strong>Generalized linear models:</strong> Same framework</li>
+                            <li><strong>Maximum likelihood:</strong> Different estimation method</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 To Nonparametric Methods (Chapter 17)</h4>
+                        <ul>
+                            <li><strong>Relaxing linearity:</strong> Smooth functions</li>
+                            <li><strong>Local regression:</strong> LOESS, kernel methods</li>
+                            <li><strong>Splines:</strong> Piecewise polynomials</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🤖 To Machine Learning (Chapter 23)</h4>
+                        <ul>
+                            <li><strong>Supervised learning:</strong> Regression as prediction</li>
+                            <li><strong>Regularization:</strong> Ridge, LASSO, Elastic Net</li>
+                            <li><strong>Cross-validation:</strong> Model selection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Summary and Key Takeaways</h2>
+
+                <div class="diagnostic-box">
+                    <h4>🎯 Essential Concepts</h4>
+                    <ul>
+                        <li><strong>Linear relationships:</strong> Simple yet powerful modeling approach</li>
+                        <li><strong>Least squares:</strong> Optimal under Gauss-Markov assumptions</li>
+                        <li><strong>Inference:</strong> t-tests, F-tests, confidence intervals</li>
+                        <li><strong>Diagnostics:</strong> Always check assumptions!</li>
+                        <li><strong>Regularization:</strong> Prevents overfitting in high dimensions</li>
+                        <li><strong>Cross-validation:</strong> Honest assessment of predictive performance</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Big Picture</h4>
+                    <p>Linear regression is the <strong>gateway to statistical modeling</strong>. Master these concepts and you'll understand:</p>
+                    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <li>How to model relationships between variables</li>
+                        <li>The trade-off between bias and variance</li>
+                        <li>Why assumptions matter in statistics</li>
+                        <li>The foundation for all advanced modeling techniques</li>
+                        <li>How to make reliable predictions from data</li>
+                    </ul>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎓 Best Practices</h4>
+                    <ul>
+                        <li><strong>Start simple:</strong> Try linear model first</li>
+                        <li><strong>Check assumptions:</strong> Use diagnostic plots</li>
+                        <li><strong>Think about causation:</strong> Regression ≠ causation</li>
+                        <li><strong>Validate predictions:</strong> Use cross-validation</li>
+                        <li><strong>Consider regularization:</strong> Especially with many predictors</li>
+                        <li><strong>Interpret carefully:</strong> Coefficients are conditional effects</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 13: Parametric Models</a>
+            <a href="#" class="nav-btn">Chapter 15: Multiple Regression →</a>
+        </div>
+    </div>
+</body>
+</html>
+                    

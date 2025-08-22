@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: Random Variables</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🎲🎯📊🔢📈';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            opacity: 0.1;
+            animation: spin 30s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #ff9a9e;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 154, 158, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ff9a9e;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∫';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 3em;
+            opacity: 0.1;
+            color: #26a69a;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #d35400;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .distribution-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .distribution-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .distribution-card h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .property-list {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #9c88ff;
+            box-shadow: 0 5px 15px rgba(156, 136, 255, 0.2);
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '🎯';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            opacity: 0.7;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 3: Random Variables</h1>
+            <p>From Outcomes to Numbers: Mathematical Modeling of Uncertainty</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 What is a Random Variable?</h2>
+                <p>A <span class="highlight">random variable</span> is a function that assigns a real number to each outcome in a sample space. It's how we mathematically represent uncertain quantities.</p>
+                
+                <div class="formula-box">
+                    X: Ω → ℝ
+                    <br><br>
+                    <strong>Think of it as:</strong> A rule that converts random outcomes into numbers we can work with mathematically!
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Dice Roll Example</h4>
+                    <p><strong>Sample Space:</strong> Ω = {⚀, ⚁, ⚂, ⚃, ⚄, ⚅}</p>
+                    <p><strong>Random Variable X:</strong> "Number of dots on the die"</p>
+                    <p><strong>Mapping:</strong> X(⚀) = 1, X(⚁) = 2, ..., X(⚅) = 6</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Types of Random Variables</h2>
+                
+                <div class="grid-2">
+                    <div class="distribution-card">
+                        <h4>🔢 Discrete Random Variables</h4>
+                        <p><strong>Definition:</strong> Takes countable values (finite or infinite)</p>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Number of heads in coin flips</li>
+                            <li>Number of cars in parking lot</li>
+                            <li>Number of emails received</li>
+                        </ul>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            <strong>PMF:</strong> P(X = x)<br>
+                            Probability Mass Function
+                        </div>
+                    </div>
+
+                    <div class="distribution-card">
+                        <h4>📈 Continuous Random Variables</h4>
+                        <p><strong>Definition:</strong> Takes any value in an interval</p>
+                        <p><strong>Examples:</strong></p>
+                        <ul>
+                            <li>Height of a person</li>
+                            <li>Time until next bus</li>
+                            <li>Stock price</li>
+                        </ul>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            <strong>PDF:</strong> f(x)<br>
+                            Probability Density Function
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Discrete Distributions</h2>
+
+                <h3>Probability Mass Function (PMF)</h3>
+                <div class="formula-box">
+                    P(X = x) = probability that X takes the value x
+                    <br><br>
+                    <strong>Properties:</strong>
+                    <br>• P(X = x) ≥ 0 for all x
+                    <br>• Σ P(X = x) = 1 (over all possible x)
+                </div>
+
+                <div class="grid-3">
+                    <div class="distribution-card">
+                        <h4>🪙 Bernoulli Distribution</h4>
+                        <p><strong>Situation:</strong> Single trial with success/failure</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            X ~ Bernoulli(p)
+                            <br>P(X = 1) = p
+                            <br>P(X = 0) = 1-p
+                        </div>
+                        <p><strong>Example:</strong> Flipping a coin once</p>
+                    </div>
+
+                    <div class="distribution-card">
+                        <h4>🎯 Binomial Distribution</h4>
+                        <p><strong>Situation:</strong> n independent Bernoulli trials</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            X ~ Binomial(n,p)
+                            <br>P(X = k) = C(n,k) × p^k × (1-p)^(n-k)
+                        </div>
+                        <p><strong>Example:</strong> Number of heads in 10 coin flips</p>
+                    </div>
+
+                    <div class="distribution-card">
+                        <h4>⚡ Poisson Distribution</h4>
+                        <p><strong>Situation:</strong> Count of rare events in fixed time/space</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            X ~ Poisson(λ)
+                            <br>P(X = k) = (λ^k × e^(-λ))/k!
+                        </div>
+                        <p><strong>Example:</strong> Number of emails per hour</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Continuous Distributions</h2>
+
+                <h3>Probability Density Function (PDF)</h3>
+                <div class="formula-box">
+                    f(x) ≥ 0 for all x
+                    <br>∫_{-∞}^{∞} f(x) dx = 1
+                    <br><br>
+                    <strong>Key Insight:</strong> P(X = exact value) = 0
+                    <br>Instead: P(a ≤ X ≤ b) = ∫_a^b f(x) dx
+                </div>
+
+                <div class="grid-2">
+                    <div class="distribution-card">
+                        <h4>🔔 Normal Distribution</h4>
+                        <p><strong>The most important distribution!</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            X ~ N(μ, σ²)
+                            <br>f(x) = (1/(σ√(2π))) × e^(-(x-μ)²/(2σ²))
+                        </div>
+                        <div class="example-box">
+                            <h4>🌟 Why Normal is Special</h4>
+                            <ul>
+                                <li>Height, weight, test scores</li>
+                                <li>Central Limit Theorem</li>
+                                <li>Many statistical methods assume normality</li>
+                                <li>Bell-shaped, symmetric</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="distribution-card">
+                        <h4>⏰ Exponential Distribution</h4>
+                        <p><strong>Waiting times and lifetimes</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            X ~ Exponential(λ)
+                            <br>f(x) = λe^(-λx) for x ≥ 0
+                        </div>
+                        <div class="example-box">
+                            <h4>📱 Real Applications</h4>
+                            <ul>
+                                <li>Time between phone calls</li>
+                                <li>Lifetime of electronic components</li>
+                                <li>Time until next earthquake</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Cumulative Distribution Function (CDF)</h2>
+                
+                <div class="theorem-box">
+                    <h4>Universal Definition</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        F(x) = P(X ≤ x)
+                    </div>
+                    <p><strong>Works for both discrete and continuous random variables!</strong></p>
+                </div>
+
+                <div class="property-list">
+                    <h4>Properties of CDF:</h4>
+                    <ol>
+                        <li><strong>Non-decreasing:</strong> If x₁ ≤ x₂, then F(x₁) ≤ F(x₂)</li>
+                        <li><strong>Bounded:</strong> 0 ≤ F(x) ≤ 1 for all x</li>
+                        <li><strong>Limits:</strong> F(-∞) = 0, F(∞) = 1</li>
+                        <li><strong>Right-continuous:</strong> F(x⁺) = F(x)</li>
+                    </ol>
+                </div>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>PMF/PDF to CDF</th>
+                        <th>CDF to PMF/PDF</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Discrete</strong></td>
+                        <td>F(x) = Σ_{k≤x} P(X = k)</td>
+                        <td>P(X = k) = F(k) - F(k⁻)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Continuous</strong></td>
+                        <td>F(x) = ∫_{-∞}^x f(t) dt</td>
+                        <td>f(x) = F'(x)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Expectation and Moments</h2>
+
+                <h3>Expected Value (Mean)</h3>
+                <div class="formula-box">
+                    <strong>Discrete:</strong> E[X] = Σ x × P(X = x)
+                    <br><strong>Continuous:</strong> E[X] = ∫_{-∞}^{∞} x × f(x) dx
+                    <br><br>
+                    <strong>Interpretation:</strong> The "center" or average value of the distribution
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Dice Example</h4>
+                    <p>Fair six-sided die:</p>
+                    <div class="formula-box">
+                        E[X] = 1×(1/6) + 2×(1/6) + ... + 6×(1/6)
+                        <br>= (1+2+3+4+5+6)/6 = 21/6 = 3.5
+                    </div>
+                    <p>Notice: Expected value doesn't have to be a possible outcome!</p>
+                </div>
+
+                <h3>Variance and Standard Deviation</h3>
+                <div class="theorem-box">
+                    <h4>Measuring Spread</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Var(X) = E[(X - E[X])²] = E[X²] - (E[X])²
+                        <br><br>
+                        SD(X) = √Var(X)
+                    </div>
+                    <p><strong>Intuition:</strong> How far do values typically deviate from the mean?</p>
+                </div>
+
+                <div class="property-list">
+                    <h4>Properties of Variance:</h4>
+                    <ol>
+                        <li><strong>Non-negative:</strong> Var(X) ≥ 0</li>
+                        <li><strong>Constant:</strong> Var(c) = 0</li>
+                        <li><strong>Scaling:</strong> Var(aX) = a²Var(X)</li>
+                        <li><strong>Independence:</strong> Var(X + Y) = Var(X) + Var(Y) if X,Y independent</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Joint Distributions</h2>
+
+                <h3>Two Random Variables</h3>
+                <div class="formula-box">
+                    <strong>Joint CDF:</strong> F(x,y) = P(X ≤ x, Y ≤ y)
+                    <br><strong>Marginal CDFs:</strong> 
+                    <br>F_X(x) = F(x,∞) = P(X ≤ x)
+                    <br>F_Y(y) = F(∞,y) = P(Y ≤ y)
+                </div>
+
+                <h3>Independence</h3>
+                <div class="theorem-box">
+                    <h4>Independent Random Variables</h4>
+                    <p>X and Y are independent if and only if:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        F(x,y) = F_X(x) × F_Y(y) for all x,y
+                    </div>
+                    <p><strong>Equivalent conditions:</strong></p>
+                    <ul>
+                        <li>f(x,y) = f_X(x) × f_Y(y) (for continuous)</li>
+                        <li>P(X=x, Y=y) = P(X=x) × P(Y=y) (for discrete)</li>
+                    </ul>
+                </div>
+
+                <h3>Covariance and Correlation</h3>
+                <div class="grid-2">
+                    <div class="formula-box">
+                        <strong>Covariance:</strong>
+                        <br>Cov(X,Y) = E[(X-E[X])(Y-E[Y])]
+                        <br>= E[XY] - E[X]E[Y]
+                        <br><br>
+                        <strong>Properties:</strong>
+                        <br>• Cov(X,X) = Var(X)
+                        <br>• Cov(X,Y) = Cov(Y,X)
+                        <br>• If X,Y independent: Cov(X,Y) = 0
+                    </div>
+
+                    <div class="formula-box">
+                        <strong>Correlation:</strong>
+                        <br>ρ(X,Y) = Cov(X,Y)/(SD(X)×SD(Y))
+                        <br><br>
+                        <strong>Properties:</strong>
+                        <br>• -1 ≤ ρ ≤ 1
+                        <br>• ρ = ±1: Perfect linear relationship
+                        <br>• ρ = 0: No linear relationship
+                        <br>• Scale invariant
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔄 Transformations</h2>
+
+                <h3>Functions of Random Variables</h3>
+                <p>If Y = g(X), how do we find the distribution of Y?</p>
+
+                <div class="theorem-box">
+                    <h4>Transformation Methods</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        <strong>CDF Method:</strong> F_Y(y) = P(Y ≤ y) = P(g(X) ≤ y)
+                        <br><br>
+                        <strong>For strictly increasing g:</strong>
+                        <br>f_Y(y) = f_X(g⁻¹(y)) × |d/dy g⁻¹(y)|
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🌡️ Temperature Conversion</h4>
+                    <p>If X ~ N(20, 4) represents temperature in Celsius, what's the distribution of Y = (9/5)X + 32 (Fahrenheit)?</p>
+                    <div class="formula-box">
+                        Y = (9/5)X + 32
+                        <br>E[Y] = (9/5)×20 + 32 = 68°F
+                        <br>Var(Y) = (9/5)²×4 = 12.96
+                        <br>Y ~ N(68, 12.96)
+                    </div>
+                </div>
+
+                <h3>Linear Combinations</h3>
+                <div class="property-list">
+                    <h4>If Y = aX + b:</h4>
+                    <ul>
+                        <li><strong>Mean:</strong> E[Y] = aE[X] + b</li>
+                        <li><strong>Variance:</strong> Var(Y) = a²Var(X)</li>
+                        <li><strong>Normal Preservation:</strong> If X ~ N(μ,σ²), then Y ~ N(aμ+b, a²σ²)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Moment Generating Functions</h2>
+
+                <div class="theorem-box">
+                    <h4>Definition and Power</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        M_X(t) = E[e^(tX)]
+                    </div>
+                    <p><strong>Why powerful?</strong></p>
+                    <ul>
+                        <li><strong>Uniqueness:</strong> MGF uniquely determines distribution</li>
+                        <li><strong>Moments:</strong> E[X^n] = M_X^(n)(0) (nth derivative at 0)</li>
+                        <li><strong>Independence:</strong> M_{X+Y}(t) = M_X(t) × M_Y(t) if independent</li>
+                    </ul>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🪙 Bernoulli(p)</h4>
+                        <div class="formula-box">
+                            M(t) = 1-p + pe^t
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🔔 Normal(μ,σ²)</h4>
+                        <div class="formula-box">
+                            M(t) = e^(μt + σ²t²/2)
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>⚡ Poisson(λ)</h4>
+                        <div class="formula-box">
+                            M(t) = e^(λ(e^t - 1))
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Mistakes</h2>
+
+                <div class="grid-2">
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Confusing PDF values with probabilities</h4>
+                        <p>For continuous variables: f(x) can be > 1!</p>
+                        <p><strong>Remember:</strong> P(X = exact value) = 0</p>
+                        <p><strong>Use:</strong> P(a ≤ X ≤ b) = ∫f(x)dx</p>
+                    </div>
+
+                    <div class="theorem-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                        <h4>❌ Assuming uncorrelated = independent</h4>
+                        <p>Independent ⟹ Uncorrelated ✓</p>
+                        <p>Uncorrelated ⟹ Independent ❌</p>
+                        <p><strong>Counterexample:</strong> X ~ N(0,1), Y = X²</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 2: Probability</a>
+            <a href="#" class="nav-btn">Chapter 4: Expectation →</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 13: Decision Theory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 50%, #e0c3fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '⚖️🎯🤔💡🎲';
+            position: absolute;
+            top: 50%;
+            left: -25%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: decision-flow 16s linear infinite;
+        }
+
+        @keyframes decision-flow {
+            0% { left: -25%; }
+            100% { left: 125%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: decision-pulse 5s ease-in-out infinite;
+        }
+
+        @keyframes decision-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.4); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .decision-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        .decision-box::before {
+            content: 'δ';
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 3em;
+            opacity: 0.3;
+            font-style: italic;
+        }
+
+        .decision-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #26a69a;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(38, 166, 154, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: 'R(θ,δ)';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.8em;
+            opacity: 0.2;
+            color: #26a69a;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .approach-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .approach-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .approach-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .approach-card h5 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .loss-demo {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #26a69a;
+            text-align: center;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .approach-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 13: Decision Theory</h1>
+            <p>Optimal Decision Making Under Uncertainty</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>⚖️ Elements of Decision Problems</h2>
+                <p>Decision theory provides a unified framework for making optimal decisions under uncertainty. It connects statistics with economics, game theory, and optimization.</p>
+                
+                <div class="decision-box">
+                    <h4>🎯 Five Components of a Decision Problem</h4>
+                    <ol>
+                        <li><strong>Parameter space Θ:</strong> Set of possible states of nature</li>
+                        <li><strong>Action space 𝒜:</strong> Set of possible actions/decisions</li>
+                        <li><strong>Sample space 𝒳:</strong> Set of possible observations</li>
+                        <li><strong>Loss function L(θ,a):</strong> Cost of action a when truth is θ</li>
+                        <li><strong>Statistical model:</strong> {P_θ : θ ∈ Θ} for the data</li>
+                    </ol>
+                </div>
+
+                <div class="example-box">
+                    <h4>🏥 Medical Diagnosis Example</h4>
+                    <p><strong>States:</strong> Θ = {healthy, diseased}</p>
+                    <p><strong>Actions:</strong> 𝒜 = {treat, don't treat}</p>
+                    <p><strong>Data:</strong> Test results (blood work, imaging, etc.)</p>
+                    <p><strong>Losses:</strong></p>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Truth \ Action</th>
+                            <th>Treat</th>
+                            <th>Don't Treat</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Healthy</strong></td>
+                            <td>10 (unnecessary treatment)</td>
+                            <td>0 (correct decision)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Diseased</strong></td>
+                            <td>1 (correct treatment)</td>
+                            <td>100 (missed disease)</td>
+                        </tr>
+                    </table>
+                    <p><strong>Goal:</strong> Choose treatment decision that minimizes expected loss</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💰 Loss Functions and Risk</h2>
+
+                <div class="approach-grid">
+                    <div class="approach-card">
+                        <h5>📊 Squared Error Loss</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            L(θ, a) = (θ - a)²
+                        </div>
+                        <p><strong>Use:</strong> Estimation problems</p>
+                        <p><strong>Penalizes:</strong> Large errors heavily</p>
+                        <p><strong>Optimal action:</strong> Posterior mean</p>
+                    </div>
+
+                    <div class="approach-card">
+                        <h5>📏 Absolute Error Loss</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            L(θ, a) = |θ - a|
+                        </div>
+                        <p><strong>Use:</strong> More robust to outliers</p>
+                        <p><strong>Optimal action:</strong> Posterior median</p>
+                        <p><strong>Advantage:</strong> Less sensitive to extreme values</p>
+                    </div>
+
+                    <div class="approach-card">
+                        <h5>🎯 0-1 Loss</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            L(θ, a) = I(θ ≠ a)
+                        </div>
+                        <p><strong>Use:</strong> Classification/testing</p>
+                        <p><strong>All errors weighted equally</strong></p>
+                        <p><strong>Optimal action:</strong> Posterior mode</p>
+                    </div>
+
+                    <div class="approach-card">
+                        <h5>⚖️ Asymmetric Loss</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            L(θ, a) = c₁(θ-a) if a < θ
+                            <br>L(θ, a) = c₂(a-θ) if a ≥ θ
+                        </div>
+                        <p><strong>Use:</strong> When over/under-estimation have different costs</p>
+                        <p><strong>Example:</strong> Inventory management</p>
+                    </div>
+                </div>
+
+                <div class="decision-box">
+                    <h4>📊 Risk Function</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        R(θ, δ) = E_θ[L(θ, δ(X))]
+                    </div>
+                    <p><strong>R(θ, δ):</strong> Expected loss when true parameter is θ and we use rule δ</p>
+                    <p><strong>δ(X):</strong> Decision rule that maps data X to action</p>
+                    <p><strong>Goal:</strong> Find decision rule that minimizes risk</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧠 Bayesian Decision Theory</h2>
+
+                <div class="decision-box">
+                    <h4>🎯 The Bayesian Approach</h4>
+                    <p><strong>Key idea:</strong> Treat θ as random with prior π(θ)</p>
+                    <p><strong>After observing data:</strong> Update to posterior π(θ|x)</p>
+                    <p><strong>Make decisions based on posterior distribution</strong></p>
+                </div>
+
+                <div class="loss-demo">
+                    <h4>📊 Posterior Risk</h4>
+                    <div class="formula-box">
+                        ρ(a|x) = E[L(θ,a)|x] = ∫ L(θ,a) π(θ|x) dθ
+                    </div>
+                    <p><strong>Bayes action:</strong> a*(x) = argmin ρ(a|x)</p>
+                    <p><strong>Minimizes expected loss given the data!</strong></p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Point Estimation Under Squared Loss</h4>
+                    <p><strong>Loss:</strong> L(θ,a) = (θ-a)²</p>
+                    <p><strong>Posterior risk:</strong> ρ(a|x) = E[(θ-a)²|x]</p>
+                    <div class="formula-box">
+                        ρ(a|x) = E[θ²|x] - 2aE[θ|x] + a²
+                        <br><br>
+                        Taking derivative: dρ/da = -2E[θ|x] + 2a = 0
+                        <br><br>
+                        <strong>Optimal action:</strong> a* = E[θ|x] (posterior mean)
+                    </div>
+                </div>
+
+                <div class="approach-grid">
+                    <div class="approach-card">
+                        <h5>📊 Bayes Risk</h5>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            r(π, δ) = E_π[R(θ, δ)] = ∫ R(θ, δ) π(θ) dθ
+                        </div>
+                        <p><strong>Overall expected loss</strong> averaging over prior</p>
+                        <p><strong>Bayes rule:</strong> δ_π = argmin r(π, δ)</p>
+                    </div>
+
+                    <div class="approach-card">
+                        <h5>🧪 Hypothesis Testing</h5>
+                        <p><strong>H₀:</strong> θ ∈ Θ₀ vs <strong>H₁:</strong> θ ∈ Θ₁</p>
+                        <p><strong>Actions:</strong> Accept H₀ or H₁</p>
+                        <p><strong>0-1 loss with costs c₀, c₁</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Choose H₁ if P(θ ∈ Θ₁|x) > c₀/(c₀ + c₁)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚔️ Minimax Decision Theory</h2>
+
+                <div class="decision-box">
+                    <h4>🛡️ Worst-Case Approach</h4>
+                    <p><strong>When no prior available:</strong> Consider worst-case scenario</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        δ_M = argmin sup R(θ, δ)
+                        δ     θ∈Θ
+                    </div>
+                    <p><strong>Minimax rule:</strong> Minimizes maximum risk</p>
+                    <p><strong>Conservative approach:</strong> Protects against worst case</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Normal Mean Estimation</h4>
+                    <p><strong>Model:</strong> X ~ N(θ, 1), squared error loss</p>
+                    <p><strong>Candidate estimators:</strong></p>
+                    <ul>
+                        <li>Sample mean: δ₁(x) = x</li>
+                        <li>Constant: δ₂(x) = 0</li>
+                        <li>Shrinkage: δ₃(x) = cx for some c ∈ [0,1]</li>
+                    </ul>
+                    <div class="formula-box">
+                        <strong>Risk of sample mean:</strong> R(θ, δ₁) = 1 for all θ
+                        <br><strong>Risk of zero:</strong> R(θ, δ₂) = θ²
+                        <br><strong>Risk of shrinkage:</strong> R(θ, δ₃) = (1-c)²θ² + c²
+                    </div>
+                    <p><strong>Minimax estimator:</strong> Sample mean δ₁(x) = x</p>
+                    <p><strong>Minimax risk:</strong> R_M = 1</p>
+                </div>
+
+                <div class="loss-demo">
+                    <h4>🔗 Connection to Bayes Rules</h4>
+                    <p><strong>Least favorable prior:</strong> Prior π* such that</p>
+                    <div class="formula-box">
+                        sup inf r(π, δ) = inf r(π*, δ)
+                        π   δ            δ
+                    </div>
+                    <p><strong>Key result:</strong> Under regularity conditions, minimax rule equals Bayes rule for least favorable prior</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>✅ Admissibility</h2>
+
+                <div class="decision-box">
+                    <h4>🎯 Dominance and Admissibility</h4>
+                    <p><strong>δ₁ dominates δ₂ if:</strong> R(θ, δ₁) ≤ R(θ, δ₂) for all θ, with strict inequality for some θ</p>
+                    <p><strong>Admissible rule:</strong> Not dominated by any other rule</p>
+                    <p><strong>Inadmissible rule:</strong> Dominated by some other rule</p>
+                </div>
+
+                <div class="approach-grid">
+                    <div class="approach-card">
+                        <h5>✅ Complete Class</h5>
+                        <p><strong>Class C is complete if:</strong> For every δ ∉ C, ∃δ' ∈ C that dominates δ</p>
+                        <p><strong>Minimal complete class:</strong> Complete class with no proper complete subset</p>
+                        <p><strong>Goal:</strong> Find smallest set containing all "reasonable" rules</p>
+                    </div>
+
+                    <div class="approach-card">
+                        <h5>🏆 Characterizing Admissible Rules</h5>
+                        <p><strong>Theorem:</strong> If δ is unique Bayes rule for some prior π, then δ is admissible</p>
+                        <p><strong>Theorem:</strong> If δ is limit of Bayes rules and has finite risk, then δ is admissible</p>
+                        <p><strong>Corollary:</strong> Admissible rules are Bayes or limits of Bayes</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>📊 Inadmissible Estimator Example</h4>
+                    <p><strong>Problem:</strong> Estimate θ = (θ₁, θ₂) from X = (X₁, X₂) where Xᵢ ~ N(θᵢ, 1)</p>
+                    <p><strong>Usual estimator:</strong> δ(X) = X = (X₁, X₂)</p>
+                    <p><strong>James-Stein estimator:</strong> δ_JS(X) = (1 - 2/||X||²)X</p>
+                    <div class="formula-box">
+                        <strong>Surprising result:</strong> James-Stein dominates the usual estimator!
+                        <br>R(θ, δ_JS) < R(θ, δ) = 2 for all θ ≠ 0
+                    </div>
+                    <p><strong>Implication:</strong> "Natural" estimators can be inadmissible</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ Comparing Approaches</h2>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Approach</th>
+                        <th>Prior Knowledge</th>
+                        <th>Criterion</th>
+                        <th>Pros</th>
+                        <th>Cons</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Bayesian</strong></td>
+                        <td>Required (prior π)</td>
+                        <td>Minimize Bayes risk</td>
+                        <td>Incorporates prior info, coherent</td>
+                        <td>Subjective prior choice</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minimax</strong></td>
+                        <td>None needed</td>
+                        <td>Minimize max risk</td>
+                        <td>Conservative, robust</td>
+                        <td>Overly pessimistic</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admissibility</strong></td>
+                        <td>None needed</td>
+                        <td>Avoid domination</td>
+                        <td>Eliminates bad rules</td>
+                        <td>Often many admissible rules</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Frequentist</strong></td>
+                        <td>None needed</td>
+                        <td>Long-run properties</td>
+                        <td>Objective, well-understood</td>
+                        <td>Doesn't use prior info</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Practical Applications</h2>
+
+                <div class="approach-grid">
+                    <div class="example-box">
+                        <h5>💼 Business Decisions</h5>
+                        <p><strong>Inventory management:</strong> How much stock to order?</p>
+                        <p><strong>Investment:</strong> Portfolio allocation under uncertainty</p>
+                        <p><strong>Pricing:</strong> Optimal pricing strategies</p>
+                        <p><strong>Quality control:</strong> When to stop production?</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🏥 Medical Decisions</h5>
+                        <p><strong>Diagnosis:</strong> Test vs treat based on symptoms</p>
+                        <p><strong>Treatment selection:</strong> Choose among therapies</p>
+                        <p><strong>Drug approval:</strong> Risk-benefit analysis</p>
+                        <p><strong>Screening programs:</strong> Population health decisions</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🏛️ Policy Decisions</h5>
+                        <p><strong>Environmental:</strong> Climate change mitigation</p>
+                        <p><strong>Public health:</strong> Vaccination strategies</p>
+                        <p><strong>Economic:</strong> Interest rate decisions</p>
+                        <p><strong>Defense:</strong> Resource allocation</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h5>🤖 Machine Learning</h5>
+                        <p><strong>Model selection:</strong> Choose among algorithms</p>
+                        <p><strong>Early stopping:</strong> When to stop training?</p>
+                        <p><strong>Active learning:</strong> Which data to label?</p>
+                        <p><strong>Reinforcement learning:</strong> Action selection</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Key Insights</h2>
+
+                <div class="decision-box">
+                    <h4>💡 Main Takeaways</h4>
+                    <ul>
+                        <li><strong>Framework unifies statistics:</strong> Estimation, testing, prediction all special cases</li>
+                        <li><strong>Loss function is crucial:</strong> Different losses lead to different optimal actions</li>
+                        <li><strong>No universally best rule:</strong> Must choose among criteria (Bayes, minimax, etc.)</li>
+                        <li><strong>Prior information valuable:</strong> When available, Bayesian approach is coherent</li>
+                        <li><strong>Admissibility important:</strong> Avoid obviously bad rules</li>
+                        <li><strong>Complete classes exist:</strong> Can focus search on "reasonable" rules</li>
+                    </ul>
+                </div>
+
+                <div class="loss-demo">
+                    <h4>🎯 Decision Theory Philosophy</h4>
+                    <p><strong>Normative approach:</strong> How should rational agents make decisions?</p>
+                    <p><strong>Prescriptive framework:</strong> Provides tools for good decision making</p>
+                    <p><strong>Connects to economics:</strong> Expected utility theory</p>
+                    <p><strong>Foundation for AI:</strong> Rational agents, game theory</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 12: Bayesian Inference</a>
+            <a href="#" class="nav-btn">Chapter 14: Linear Regression →</a>
+        </div>
+    </div>
+</body>
+</html>

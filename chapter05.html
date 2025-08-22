@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: Probability Inequalities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 50%, #ff6b6b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '≤≥≤≥≤≥≤≥≤≥';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 6em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-left: 5px solid #ff6b6b;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,107,107,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .inequality-type {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .inequality-type::before {
+            content: '≤';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .inequality-type:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .inequality-type h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: '∀ε>0';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.2em;
+            opacity: 0.3;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∃δ>0';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #f39c12;
+            text-align: center;
+        }
+
+        .bound-hierarchy {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .bound-hierarchy .arrow {
+            color: #e67e22;
+            font-size: 2em;
+        }
+
+        .bound-item {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .bound-item:hover {
+            transform: scale(1.05);
+        }
+
+        .application-box {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(0, 184, 148, 0.3);
+        }
+
+        .application-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .pitfall-box {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(225, 112, 85, 0.3);
+        }
+
+        .pitfall-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .bound-hierarchy {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 5: Probability Inequalities</h1>
+            <p>Essential Tools for Controlling Randomness and Uncertainty</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Why Study Probability Inequalities?</h2>
+                <p>Probability inequalities are the <strong>backbone of statistical theory</strong>! They provide bounds on probabilities and expectations, enable concentration results, and form the theoretical foundation for statistical inference.</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Real-World Motivation</h4>
+                    <p><strong>Stock Market Example:</strong> You want to know how likely it is that your portfolio loses more than 20% in a month. Even if you don't know the exact distribution of returns, probability inequalities can give you useful bounds on this probability!</p>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🔍 The Big Picture</h4>
+                    <p>Inequalities let us say things like:</p>
+                    <div class="bound-hierarchy">
+                        <span class="bound-item">"At least 75% of data"</span>
+                        <span class="arrow">→</span>
+                        <span class="bound-item">"within 2σ of mean"</span>
+                        <span class="arrow">→</span>
+                        <span class="bound-item">"regardless of distribution!"</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ Basic Inequalities - The Foundation</h2>
+
+                <div class="inequality-type">
+                    <h4>📏 Markov's Inequality</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        For X ≥ 0 and a > 0:
+                        <br><strong>P(X ≥ a) ≤ E[X]/a</strong>
+                    </div>
+                    <p><strong>Key Insight:</strong> Uses only the mean! Very general but often loose.</p>
+                    <p><strong>Proof Idea:</strong> E[X] = ∫ x dP ≥ ∫_{X≥a} x dP ≥ a·P(X ≥ a)</p>
+                </div>
+
+                <div class="inequality-type">
+                    <h4>📊 Chebyshev's Inequality</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        P(|X - μ| ≥ k) ≤ σ²/k²
+                        <br>P(|X - μ| ≥ kσ) ≤ 1/k²
+                    </div>
+                    <p><strong>Famous Result:</strong> At least 75% of data within 2σ, 89% within 3σ</p>
+                    <p><strong>Proof:</strong> Apply Markov to (X - μ)²</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Concrete Example: Dice Rolling</h4>
+                    <p><strong>Setup:</strong> Roll a fair die, X = outcome</p>
+                    <p><strong>Known:</strong> E[X] = 3.5, Var(X) = 35/12 ≈ 2.92</p>
+                    <p><strong>Markov:</strong> P(X ≥ 5) ≤ 3.5/5 = 0.7 (actual = 2/6 ≈ 0.33)</p>
+                    <p><strong>Chebyshev:</strong> P(|X - 3.5| ≥ 2) ≤ 2.92/4 = 0.73 (actual = 4/6 ≈ 0.67)</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Union Bound - Controlling Multiple Events</h2>
+
+                <div class="theorem-box">
+                    <h4>🎯 Boole's Inequality</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(⋃ᵢ Aᵢ) ≤ Σᵢ P(Aᵢ)
+                    </div>
+                    <p><strong>Interpretation:</strong> Probability of any event occurring ≤ sum of individual probabilities</p>
+                </div>
+
+                <div class="application-box">
+                    <h4>🎯 Critical Applications</h4>
+                    <ul>
+                        <li><strong>Multiple Testing:</strong> Control family-wise error rate in statistical tests</li>
+                        <li><strong>Machine Learning:</strong> Bound generalization error over hypothesis classes</li>
+                        <li><strong>Network Reliability:</strong> Bound probability of any component failure</li>
+                        <li><strong>Algorithm Analysis:</strong> Worst-case probability bounds</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>📚 Multiple Testing Crisis</h4>
+                    <p><strong>Problem:</strong> Testing 1000 hypotheses at α = 0.05 each</p>
+                    <p><strong>Naive approach:</strong> P(at least one false positive) could be huge!</p>
+                    <div class="formula-box">
+                        By Union Bound: P(any false positive) ≤ 1000 × 0.05 = 50!
+                    </div>
+                    <p><strong>Solution:</strong> Bonferroni correction: Use α/1000 = 0.00005 for each test</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Chernoff Bounds - Exponential Concentration</h2>
+
+                <div class="theorem-box">
+                    <h4>🚀 The Chernoff Method</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(X ≥ a) ≤ inf_{t>0} M_X(t)e^{-ta}
+                    </div>
+                    <p><strong>Strategy:</strong> Use moment generating functions to get exponential bounds!</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="inequality-type">
+                        <h4>🎯 Hoeffding's Inequality</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            For Xᵢ ∈ [aᵢ,bᵢ] independent:
+                            <br>P(|Sₙ - E[Sₙ]| ≥ t) ≤ 2exp(-2t²/Σ(bᵢ-aᵢ)²)
+                        </div>
+                        <p><strong>Key:</strong> Exponential decay in tail probability!</p>
+                    </div>
+
+                    <div class="inequality-type">
+                        <h4>⚡ Bernstein's Inequality</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            P(Sₙ ≥ t) ≤ exp(-t²/(2(v + Mt/3)))
+                        </div>
+                        <p><strong>Advantage:</strong> Better when variance v is small!</p>
+                    </div>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>📊 Exponential vs Polynomial Decay</h4>
+                    <div class="bound-hierarchy">
+                        <span class="bound-item">Markov: 1/t</span>
+                        <span class="arrow">vs</span>
+                        <span class="bound-item">Chebyshev: 1/t²</span>
+                        <span class="arrow">vs</span>
+                        <span class="bound-item">Chernoff: e^{-ct²}</span>
+                    </div>
+                    <p><strong>Exponential bounds are MUCH stronger!</strong></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Concentration Inequalities - Modern Tools</h2>
+
+                <div class="theorem-box">
+                    <h4>🌟 Sub-Gaussian Random Variables</h4>
+                    <p>X is <strong>sub-Gaussian</strong> with parameter σ if:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        E[e^{t(X-E[X])}] ≤ e^{σ²t²/2}
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🔢 Examples of Sub-Gaussian</h4>
+                        <ul>
+                            <li><strong>Gaussian variables</strong></li>
+                            <li><strong>Bounded variables:</strong> X ∈ [a,b]</li>
+                            <li><strong>Rademacher variables:</strong> P(X = ±1) = 1/2</li>
+                        </ul>
+                    </div>
+
+                    <div class="inequality-type" style="background: linear-gradient(135deg, #00b894 0%, #00a085 100%);">
+                        <h4>⚡ Sub-Gaussian Concentration</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            P(|Sₙ - E[Sₙ]| ≥ t) ≤ 2e^{-t²/(2nσ²)}
+                        </div>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 Sub-Exponential</h4>
+                        <p><strong>Heavier tails than sub-Gaussian</strong></p>
+                        <p>Examples: squared Gaussians, exponential variables</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Martingale Inequalities - Sequential Processes</h2>
+
+                <div class="theorem-box">
+                    <h4>🌊 Azuma's Inequality</h4>
+                    <p>For martingale with bounded differences |Mᵢ - Mᵢ₋₁| ≤ cᵢ:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(|Mₙ - M₀| ≥ t) ≤ 2exp(-t²/(2Σcᵢ²))
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="inequality-type">
+                        <h4>🔄 McDiarmid's Inequality</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            For function f with bounded differences:
+                            <br>P(|f(X₁,...,Xₙ) - E[f]| ≥ t) ≤ 2exp(-2t²/Σcᵢ²)
+                        </div>
+                    </div>
+
+                    <div class="application-box" style="background: linear-gradient(135deg, #6c5ce7 0%, #5f3dc4 100%);">
+                        <h4>🚀 Applications</h4>
+                        <ul>
+                            <li><strong>Random Graphs:</strong> Chromatic numbers</li>
+                            <li><strong>Machine Learning:</strong> Generalization bounds</li>
+                            <li><strong>Algorithms:</strong> Randomized analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔢 Matrix Concentration - High-Dimensional Data</h2>
+
+                <div class="theorem-box">
+                    <h4>🧮 Matrix Chernoff Bound</h4>
+                    <p>For independent random matrices Xᵢ:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(λₘₐₓ(Σ Xᵢ - E[Σ Xᵢ]) ≥ t) ≤ d·e^{-t²/(2σ²)}
+                    </div>
+                </div>
+
+                <div class="application-box">
+                    <h4>🎯 Modern Applications</h4>
+                    <ul>
+                        <li><strong>Random Matrix Theory:</strong> Eigenvalue bounds for random matrices</li>
+                        <li><strong>Covariance Estimation:</strong> Sample covariance concentration</li>
+                        <li><strong>Principal Component Analysis:</strong> Perturbation bounds</li>
+                        <li><strong>Machine Learning:</strong> High-dimensional generalization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏗️ Hierarchy of Bounds</h2>
+
+                <div class="visual-demo">
+                    <h4>📊 The Strength Hierarchy</h4>
+                    <p><em>More assumptions → Tighter bounds</em></p>
+                    
+                    <div class="bound-hierarchy">
+                        <div class="bound-item">Markov<br><small>Mean only</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Chebyshev<br><small>+ Variance</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Chernoff<br><small>+ MGF</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Hoeffding<br><small>+ Bounded</small></div>
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Inequality</th>
+                        <th>Assumptions</th>
+                        <th>Bound Type</th>
+                        <th>When to Use</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Markov</strong></td>
+                        <td>X ≥ 0, E[X] exists</td>
+                        <td>1/t</td>
+                        <td>Only mean known</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chebyshev</strong></td>
+                        <td>Finite variance</td>
+                        <td>1/t²</td>
+                        <td>Mean and variance known</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chernoff</strong></td>
+                        <td>MGF exists</td>
+                        <td>e^{-ct}</td>
+                        <td>Want exponential bounds</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hoeffding</strong></td>
+                        <td>Bounded variables</td>
+                        <td>e^{-ct²}</td>
+                        <td>Bounded independent variables</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Modern Applications in Statistics</h2>
+
+                <div class="grid-3">
+                    <div class="application-box">
+                        <h4>🤖 Machine Learning</h4>
+                        <ul>
+                            <li><strong>PAC Learning:</strong> Sample complexity bounds</li>
+                            <li><strong>Generalization:</strong> P(R(h) - R̂(h) ≥ ε) ≤ δ</li>
+                            <li><strong>Online Learning:</strong> Regret bounds</li>
+                            <li><strong>High-dimensional:</strong> Sparse recovery theory</li>
+                        </ul>
+                    </div>
+
+                    <div class="application-box">
+                        <h4>📊 Hypothesis Testing</h4>
+                        <ul>
+                            <li><strong>Multiple Testing:</strong> FDR control</li>
+                            <li><strong>Sequential Testing:</strong> Early stopping</li>
+                            <li><strong>Chernoff bounds:</strong> Exponential error rates</li>
+                            <li><strong>Minimax theory:</strong> Lower bounds via Fano's inequality</li>
+                        </ul>
+                    </div>
+
+                    <div class="application-box">
+                        <h4>💰 Risk Management</h4>
+                        <ul>
+                            <li><strong>VaR bounds:</strong> Value at risk calculations</li>
+                            <li><strong>Tail risk:</strong> Extreme event probabilities</li>
+                            <li><strong>Portfolio theory:</strong> Concentration bounds for returns</li>
+                            <li><strong>Stress testing:</strong> Worst-case scenario bounds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔬 Advanced Topics - Cutting Edge</h2>
+
+                <div class="grid-2">
+                    <div class="theorem-box">
+                        <h4>🌊 Empirical Process Theory</h4>
+                        <p><strong>DKW Inequality:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(sup_x |F̂ₙ(x) - F(x)| > ε) ≤ 2e^{-2nε²}
+                        </div>
+                        <p><strong>Applications:</strong> Kolmogorov-Smirnov test, goodness-of-fit</p>
+                    </div>
+
+                    <div class="theorem-box">
+                        <h4>🎯 Rademacher Complexity</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            R_n(ℱ) = E[sup_{f∈ℱ} (1/n)Σᵢσᵢf(Xᵢ)]
+                        </div>
+                        <p><strong>Bound:</strong> E[sup_{f∈ℱ} |Pₙf - Pf|] ≤ 2R_n(ℱ)</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🧠 Information-Theoretic Inequalities</h4>
+                    <ul>
+                        <li><strong>Fano's Inequality:</strong> H(θ|X) ≤ h_b(P_e) + P_e log(|Θ| - 1)</li>
+                        <li><strong>Data Processing:</strong> I(X;Y) ≥ I(X;Z) when X → Y → Z</li>
+                        <li><strong>Applications:</strong> Lower bounds on estimation error</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls and How to Avoid Them</h2>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>❌ Wrong tail direction</h4>
+                        <p><strong>Problem:</strong> Confusing one-sided vs two-sided bounds</p>
+                        <p><strong>Solution:</strong> Always specify which tail you're bounding</p>
+                        <p><strong>Remember:</strong> P(|X| ≥ t) ≤ 2P(X ≥ t) for symmetric distributions</p>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>❌ Independence assumptions</h4>
+                        <p><strong>Problem:</strong> Many bounds require independence</p>
+                        <p><strong>Reality:</strong> Real data often has dependence</p>
+                        <p><strong>Solution:</strong> Use martingale or mixing inequalities</p>
+                    </div>
+                </div>
+
+                <div class="pitfall-box">
+                    <h4>❌ Ignoring constants in bounds</h4>
+                    <p><strong>Problem:</strong> Inequality constants often not sharp for finite samples</p>
+                    <p><strong>Example:</strong> Chebyshev bound is often very loose compared to actual probability</p>
+                    <p><strong>Solution:</strong> Use bounds for qualitative insights, not precise quantitative predictions</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>❌ Moment conditions</h4>
+                        <p><strong>Problem:</strong> Forgetting to check if required moments exist</p>
+                        <p><strong>Example:</strong> Chebyshev requires finite variance</p>
+                        <p><strong>Solution:</strong> Always verify assumptions!</p>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>❌ Misusing union bounds</h4>
+                        <p><strong>Problem:</strong> Union bound can be very loose</p>
+                        <p><strong>Better:</strong> Use Bonferroni-Holm or other refined methods</p>
+                        <p><strong>When tight:</strong> When events are nearly disjoint</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Chapters</h2>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>📈 To Convergence (Chapter 6)</h4>
+                        <ul>
+                            <li><strong>Law of Large Numbers:</strong> Chebyshev inequality proof</li>
+                            <li><strong>Central Limit Theorem:</strong> Berry-Esseen bounds</li>
+                            <li><strong>Concentration:</strong> Almost sure convergence</li>
+                            <li><strong>Rates:</strong> How fast convergence happens</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 To CDF Estimation (Chapter 8)</h4>
+                        <ul>
+                            <li><strong>Glivenko-Cantelli:</strong> Uniform convergence</li>
+                            <li><strong>DKW inequality:</strong> Concentration of empirical CDF</li>
+                            <li><strong>Kolmogorov-Smirnov:</strong> Test statistics</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🔬 To Hypothesis Testing (Chapter 11)</h4>
+                        <ul>
+                            <li><strong>Type I/II errors:</strong> Error probability bounds</li>
+                            <li><strong>Multiple testing:</strong> Family-wise error control</li>
+                            <li><strong>Sequential tests:</strong> Stopping time analysis</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🤖 To Machine Learning (Chapter 23)</h4>
+                        <ul>
+                            <li><strong>Generalization bounds:</strong> PAC learning theory</li>
+                            <li><strong>Empirical risk:</strong> Concentration inequalities</li>
+                            <li><strong>High-dimensional:</strong> Sparse recovery bounds</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Regression (Chapters 14-15)</h4>
+                        <ul>
+                            <li><strong>Least squares:</strong> Concentration of estimators</li>
+                            <li><strong>High-dimensional:</strong> LASSO theory</li>
+                            <li><strong>Prediction:</strong> Generalization bounds</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>⏰ To Time Series (Chapter 18)</h4>
+                        <ul>
+                            <li><strong>Dependent data:</strong> Martingale inequalities</li>
+                            <li><strong>Mixing sequences:</strong> Modified concentration</li>
+                            <li><strong>Long memory:</strong> Modified bounds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Summary and Key Takeaways</h2>
+
+                <div class="application-box">
+                    <h4>🎯 Main Messages</h4>
+                    <ul>
+                        <li><strong>Hierarchy of bounds:</strong> More assumptions → tighter bounds</li>
+                        <li><strong>Exponential vs polynomial:</strong> Chernoff bounds much stronger than Chebyshev</li>
+                        <li><strong>Independence matters:</strong> Most results require careful checking</li>
+                        <li><strong>Modern applications:</strong> Essential for machine learning and high-dimensional statistics</li>
+                        <li><strong>Practical tool:</strong> Guide intuition even when not numerically tight</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Big Picture</h4>
+                    <p>Probability inequalities are the <strong>mathematical foundation</strong> that lets us:</p>
+                    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <li>Bound the probability of rare events</li>
+                        <li>Control error rates in statistical procedures</li>
+                        <li>Prove convergence theorems</li>
+                        <li>Design algorithms with performance guarantees</li>
+                        <li>Understand when statistical methods work</li>
+                    </ul>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎓 Practical Guidelines</h4>
+                    <ul>
+                        <li><strong>Start simple:</strong> Try Markov/Chebyshev first</li>
+                        <li><strong>Check assumptions:</strong> Independence, moment conditions</li>
+                        <li><strong>Choose the right tool:</strong> Match inequality to problem structure</li>
+                        <li><strong>Don't trust constants:</strong> Use for qualitative insights</li>
+                        <li><strong>Combine methods:</strong> Union bounds + concentration often powerful</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔮 Looking Forward</h4>
+                    <p><strong>Modern developments:</strong></p>
+                    <ul>
+                        <li><strong>High-dimensional probability:</strong> Dimension-free bounds</li>
+                        <li><strong>Non-commutative inequalities:</strong> Matrix concentration</li>
+                        <li><strong>Optimal transport:</strong> Wasserstein inequalities</li>
+                        <li><strong>Machine learning theory:</strong> Algorithm-specific bounds</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 4: Expectation</a>
+            <a href="#" class="nav-btn">Chapter 6: Convergence →</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 17: Nonparametric Smoothing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 50%, #96ceb4 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '~~~∿~~~∿~~~∿~~~';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .content { padding: 40px; }
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f0fff0 0%, #e6ffe6 100%);
+            border-left: 5px solid #96ceb4;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(150,206,180,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(150, 206, 180, 0.2);
+        }
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #96ceb4;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #96ceb4, #8fbc8f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+        .smooth-concept {
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(150, 206, 180, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .smooth-concept::before {
+            content: '∿';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+        .smooth-concept:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(150, 206, 180, 0.4);
+        }
+        .smooth-concept h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+        .formula-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #ffa000;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(255, 160, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .formula-box::before {
+            content: '∫';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.3;
+            color: #f57c00;
+            font-style: italic;
+        }
+        .example-box {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #e91e63;
+            box-shadow: 0 8px 20px rgba(233, 30, 99, 0.2);
+            position: relative;
+        }
+        .example-box h4 {
+            color: #ad1457;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .theorem-box {
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(150, 206, 180, 0.3);
+            position: relative;
+        }
+        .theorem-box::before {
+            content: '≈';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+        .bandwidth-box {
+            background: linear-gradient(135deg, #ffecb3 0%, #ffe082 100%);
+            color: #bf360c;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #ff9800;
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.2);
+        }
+        .bandwidth-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .method-visual {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #ffa000;
+            text-align: center;
+        }
+        .method-comparison {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+        .method-comparison .arrow {
+            color: #f57c00;
+            font-size: 2em;
+        }
+        .method-item {
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(150, 206, 180, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .method-item:hover {
+            transform: scale(1.05);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .comparison-table th {
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .spline-visual {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .spline-types {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .spline-type {
+            background: linear-gradient(135deg, #96ceb4, #8fbc8f);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 150px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        .spline-type:hover {
+            transform: translateY(-5px);
+        }
+        .diagnostic-box {
+            background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(0, 230, 118, 0.3);
+        }
+        .diagnostic-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #f0fff0 0%, #e6ffe6 100%);
+        }
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #96ceb4 0%, #8fbc8f 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(150, 206, 180, 0.3);
+        }
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(150, 206, 180, 0.4);
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2em; }
+            .content { padding: 20px; }
+            .method-comparison { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 17: Nonparametric Smoothing</h1>
+            <p>Flexible Function Estimation Without Rigid Assumptions</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Why Nonparametric Smoothing?</h2>
+                <p>Real relationships are rarely perfectly linear! <strong>Nonparametric smoothing</strong> lets the data reveal the true shape of relationships without forcing them into rigid parametric forms.</p>
+                
+                <div class="example-box">
+                    <h4>📈 Real-World Example: Temperature vs Energy Usage</h4>
+                    <p><strong>Linear model:</strong> Energy = β₀ + β₁ × Temperature</p>
+                    <p><strong>Problem:</strong> Misses the U-shaped relationship (heating in winter, cooling in summer)</p>
+                    <p><strong>Nonparametric solution:</strong> Let the data show the true curve!</p>
+                </div>
+
+                <div class="method-visual">
+                    <h4>🔄 The Flexibility Spectrum</h4>
+                    <div class="method-comparison">
+                        <span class="method-item">Parametric<br><small>Rigid</small></span>
+                        <span class="arrow">→</span>
+                        <span class="method-item">Semiparametric<br><small>Mixed</small></span>
+                        <span class="arrow">→</span>
+                        <span class="method-item">Nonparametric<br><small>Flexible</small></span>
+                    </div>
+                    <p><strong>Trade-off:</strong> Flexibility vs Interpretability vs Sample Size Requirements</p>
+                </div>
+
+                <div class="bandwidth-box">
+                    <h4>⚖️ The Bias-Variance Trade-off</h4>
+                    <p><strong>More smoothing (larger bandwidth):</strong> Lower variance, higher bias</p>
+                    <p><strong>Less smoothing (smaller bandwidth):</strong> Higher variance, lower bias</p>
+                    <p><strong>Goal:</strong> Find the optimal balance!</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🌟 Applications Everywhere</h4>
+                    <ul>
+                        <li><strong>Medical:</strong> Growth curves, dose-response relationships</li>
+                        <li><strong>Economics:</strong> Supply and demand curves, business cycles</li>
+                        <li><strong>Engineering:</strong> Signal processing, quality control</li>
+                        <li><strong>Environmental:</strong> Climate trends, pollution modeling</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Kernel Regression - The Foundation</h2>
+
+                <div class="smooth-concept">
+                    <h4>🔍 The Kernel Approach</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        m̂(x) = Σᵢ wᵢ(x) Yᵢ
+                        <br>where wᵢ(x) = K((x-Xᵢ)/h) / Σⱼ K((x-Xⱼ)/h)
+                    </div>
+                    <p><strong>Idea:</strong> Weighted average of nearby observations</p>
+                    <p><strong>Weights:</strong> Determined by kernel function K and bandwidth h</p>
+                </div>
+
+                <div class="grid-3">
+                    <div class="smooth-concept">
+                        <h4>📊 Nadaraya-Watson Estimator</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            m̂(x) = Σᵢ Kₕ(x-Xᵢ)Yᵢ / Σⱼ Kₕ(x-Xⱼ)
+                        </div>
+                        <p><strong>Most common</strong> kernel regression estimator</p>
+                        <p><strong>Problem:</strong> Boundary bias issues</p>
+                    </div>
+
+                    <div class="smooth-concept">
+                        <h4>🎯 Local Linear Regression</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            min Σᵢ Kₕ(x-Xᵢ)(Yᵢ - a - b(Xᵢ-x))²
+                        </div>
+                        <p><strong>Better boundary behavior</strong> than Nadaraya-Watson</p>
+                        <p><strong>Fits local line</strong> at each point</p>
+                    </div>
+
+                    <div class="smooth-concept">
+                        <h4>🔧 Local Polynomial</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Fit degree-p polynomial locally
+                        </div>
+                        <p><strong>Higher order</strong> for smoother curves</p>
+                        <p><strong>Trade-off:</strong> Smoothness vs variance</p>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>📈 Common Kernel Functions</h4>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Uniform: K(u) = ½ I(|u| ≤ 1)
+                        <br>Gaussian: K(u) = (1/√2π) exp(-u²/2)
+                        <br>Epanechnikov: K(u) = ¾(1-u²) I(|u| ≤ 1)
+                        <br>Tricube: K(u) = (70/81)(1-|u|³)³ I(|u| ≤ 1)
+                    </div>
+                    <p><strong>Epanechnikov is optimal</strong> in terms of mean squared error!</p>
+                    <p><strong>Gaussian is smooth</strong> everywhere (no compact support)</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎯 Bandwidth Selection - The Critical Choice</h4>
+                    <p><strong>Cross-Validation:</strong> Choose h to minimize CV(h) = Σᵢ(Yᵢ - m̂₋ᵢ(Xᵢ))²</p>
+                    <p><strong>Rule of thumb:</strong> h = c × n^(-1/5) where c depends on kernel</p>
+                    <p><strong>Plug-in methods:</strong> Estimate optimal h using pilot estimates</p>
+                    <p><strong>MISE optimal:</strong> h* ∝ n^(-1/5) for univariate kernel regression</p>
+                </div>
+
+                <div class="bandwidth-box">
+                    <h4>📊 Asymptotic Properties</h4>
+                    <p><strong>Bias:</strong> O(h²) if m has two continuous derivatives</p>
+                    <p><strong>Variance:</strong> O(1/(nh)) for kernel estimators</p>
+                    <p><strong>MSE:</strong> O(h⁴ + 1/(nh)) → optimal rate n^(-4/5)</p>
+                    <p><strong>Slower than parametric:</strong> n^(-4/5) vs n^(-1) for parametric models</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌊 Smoothing Splines - Optimal Smoothness</h2>
+
+                <div class="theorem-box">
+                    <h4>⚖️ The Smoothing Spline Problem</h4>
+                    <p>Find function g that minimizes:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        RSS(g) + λ ∫ (g''(x))² dx
+                    </div>
+                    <p><strong>First term:</strong> Goodness of fit (fidelity to data)</p>
+                    <p><strong>Second term:</strong> Roughness penalty (encourages smoothness)</p>
+                    <p><strong>λ:</strong> Smoothing parameter controlling bias-variance trade-off</p>
+                </div>
+
+                <div class="smooth-concept">
+                    <h4>🎯 The Remarkable Solution</h4>
+                    <p><strong>Theorem:</strong> The minimizer is a natural cubic spline with knots at all data points!</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        ĝ(x) = Σᵢ αᵢ Nᵢ(x)
+                    </div>
+                    <p>where Nᵢ(x) are natural cubic spline basis functions</p>
+                    <p><strong>Matrix form:</strong> ĝ = S_λ y where S_λ is the smoother matrix</p>
+                </div>
+
+                <div class="spline-visual">
+                    <h2>🔧 Types of Splines</h2>
+                    <p>Different spline types for different needs</p>
+                </div>
+
+                <div class="spline-types">
+                    <div class="spline-type">
+                        <h4>📏 Linear Splines</h4>
+                        <p><strong>Piecewise linear</strong></p>
+                        <p>Continuous but not smooth</p>
+                        <p>Simple but limited</p>
+                    </div>
+
+                    <div class="spline-type">
+                        <h4>📊 Cubic Splines</h4>
+                        <p><strong>Piecewise cubic</strong></p>
+                        <p>Continuous with continuous first two derivatives</p>
+                        <p>Good balance of flexibility</p>
+                    </div>
+
+                    <div class="spline-type">
+                        <h4>🌿 Natural Splines</h4>
+                        <p><strong>Linear beyond boundary knots</strong></p>
+                        <p>Better extrapolation behavior</p>
+                        <p>Avoids boundary oscillations</p>
+                    </div>
+
+                    <div class="spline-type">
+                        <h4>🎯 B-splines</h4>
+                        <p><strong>Computational efficiency</strong></p>
+                        <p>Local support, stable numerics</p>
+                        <p>Basis for many algorithms</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔄 Degrees of Freedom</h4>
+                    <p><strong>Key insight:</strong> Smoothing splines have a well-defined notion of "degrees of freedom"</p>
+                    <div class="formula-box">
+                        df(λ) = tr(S_λ)
+                    </div>
+                    <p>where S_λ is the smoother matrix: ĝ = S_λ y</p>
+                    <p><strong>λ = 0:</strong> df = n (interpolation - overfitting)</p>
+                    <p><strong>λ → ∞:</strong> df = 2 (linear fit - underfitting)</p>
+                    <p><strong>Practical range:</strong> df ∈ [2, n] chosen by cross-validation</p>
+                </div>
+
+                <div class="bandwidth-box">
+                    <h4>📊 Generalized Cross-Validation (GCV)</h4>
+                    <div class="formula-box">
+                        GCV(λ) = n||y - S_λy||² / (n - tr(S_λ))²
+                    </div>
+                    <p><strong>Advantage:</strong> Avoids actual cross-validation computation</p>
+                    <p><strong>Approximation:</strong> To leave-one-out cross-validation</p>
+                    <p><strong>Practical:</strong> Choose λ minimizing GCV(λ)</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏠 Local Regression (LOESS) - Robust and Adaptive</h2>
+
+                <div class="theorem-box">
+                    <h4>🎯 LOESS Algorithm</h4>
+                    <p>For each point x₀:</p>
+                    <ol>
+                        <li><strong>Find k nearest neighbors</strong> to x₀ (or points within distance)</li>
+                        <li><strong>Assign weights</strong> based on distance using weight function</li>
+                        <li><strong>Fit weighted polynomial</strong> (usually linear or quadratic)</li>
+                        <li><strong>Predict</strong> at x₀ using fitted polynomial</li>
+                        <li><strong>Optionally:</strong> Iterate with robust weights for outlier resistance</li>
+                    </ol>
+                </div>
+
+                <div class="grid-2">
+                    <div class="smooth-concept">
+                        <h4>📊 Weight Function</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            wᵢ = W(|x₀-xᵢ|/d_k(x₀))
+                        </div>
+                        <p>where d_k(x₀) is distance to k-th nearest neighbor</p>
+                        <p><strong>Tricube weight:</strong> W(u) = (1-u³)³ for u ∈ [0,1]</p>
+                        <p><strong>Properties:</strong> Smooth, compact support, downweights distant points</p>
+                    </div>
+
+                    <div class="smooth-concept">
+                        <h4>🎯 Smoothing Parameter</h4>
+                        <p><strong>Span:</strong> α = k/n (fraction of data used)</p>
+                        <p><strong>Small α:</strong> More local, wiggly fit, high variance</p>
+                        <p><strong>Large α:</strong> More global, smooth fit, high bias</p>
+                        <p><strong>Typical values:</strong> α ∈ [0.2, 0.8]</p>
+                        <p><strong>Selection:</strong> Cross-validation or AIC</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🌟 Advantages of LOESS</h4>
+                    <ul>
+                        <li><strong>Robust:</strong> Can handle outliers with robust fitting procedures</li>
+                        <li><strong>Automatic:</strong> Adapts to local data density</li>
+                        <li><strong>Flexible:</strong> Can capture complex patterns without assuming global form</li>
+                        <li><strong>Interpretable:</strong> Easy to understand algorithm and parameters</li>
+                        <li><strong>Well-tested:</strong> Widely used in exploratory data analysis</li>
+                    </ul>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🛡️ Robust LOESS</h4>
+                    <p><strong>Problem:</strong> Outliers can distort local fits</p>
+                    <p><strong>Solution:</strong> Iteratively reweight based on residuals</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        δᵢ = B(|rᵢ|/6s)
+                    </div>
+                    <p>where B is bisquare function and s is median absolute residual</p>
+                    <p><strong>Iteration:</strong> Refit with weights wᵢ × δᵢ until convergence</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌳 Regression Trees - Recursive Partitioning</h2>
+
+                <div class="theorem-box">
+                    <h4>🔄 Tree Building Algorithm</h4>
+                    <p><strong>Recursive binary splitting:</strong></p>
+                    <ol>
+                        <li><strong>Consider all possible splits</strong> on all variables</li>
+                        <li><strong>Choose split minimizing RSS:</strong

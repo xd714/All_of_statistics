@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Convergence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '∞→∞→∞→∞→∞';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 6em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .convergence-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .convergence-type::before {
+            content: '→';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .convergence-type:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .convergence-type h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-box::before {
+            content: 'lim';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2em;
+            opacity: 0.2;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #9c88ff;
+            box-shadow: 0 8px 20px rgba(156, 136, 255, 0.2);
+            position: relative;
+        }
+
+        .example-box h4 {
+            color: #5a4fcf;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∀ε>0';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #f39c12;
+            text-align: center;
+        }
+
+        .sequence-demo {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .sequence-demo .arrow {
+            color: #e67e22;
+            font-size: 2em;
+        }
+
+        .law-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .law-box h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .pitfall-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .pitfall-box h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 6: Convergence</h1>
+            <p>Understanding How Sequences Approach Their Limits</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Why Study Convergence?</h2>
+                <p>Convergence is the foundation of all asymptotic statistics! It tells us what happens to our estimators and test statistics as sample size grows to infinity.</p>
+                
+                <div class="example-box">
+                    <h4>🌟 Real-World Motivation</h4>
+                    <p><strong>Poll Example:</strong> As we survey more people, our sample proportion gets closer to the true population proportion. But in what sense "closer"? How fast? These questions need precise mathematical answers!</p>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🔍 Intuitive Picture</h4>
+                    <div class="sequence-demo">
+                        <span>X₁</span>
+                        <span class="arrow">→</span>
+                        <span>X₂</span>
+                        <span class="arrow">→</span>
+                        <span>X₃</span>
+                        <span class="arrow">→</span>
+                        <span>...</span>
+                        <span class="arrow">→</span>
+                        <span style="color: #e74c3c;">X</span>
+                    </div>
+                    <p>A sequence {Xₙ} converging to X means the terms get arbitrarily close to X as n increases</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Types of Convergence</h2>
+                <p>There are several ways a sequence can converge, each with different meanings and implications!</p>
+
+                <div class="grid-2">
+                    <div class="convergence-type">
+                        <h4>🎯 Convergence in Probability</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Xₙ →ᵖ X if:
+                            <br>lim P(|Xₙ - X| > ε) = 0
+                            <br>for all ε > 0
+                        </div>
+                        <p><strong>Meaning:</strong> The probability that Xₙ is far from X goes to zero</p>
+                        <p><strong>Example:</strong> Sample mean converging to population mean</p>
+                    </div>
+
+                    <div class="convergence-type">
+                        <h4>🔒 Almost Sure Convergence</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Xₙ →ᵃ·ˢ· X if:
+                            <br>P(lim Xₙ = X) = 1
+                        </div>
+                        <p><strong>Meaning:</strong> For almost all sample paths, Xₙ converges to X</p>
+                        <p><strong>Stronger than:</strong> Convergence in probability</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="convergence-type">
+                        <h4>📊 Convergence in Distribution</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Xₙ ⇒ X if:
+                            <br>lim Fₙ(x) = F(x)
+                            <br>at all continuity points of F
+                        </div>
+                        <p><strong>Meaning:</strong> CDFs converge pointwise</p>
+                        <p><strong>Weakest form:</strong> Only distributional properties matter</p>
+                    </div>
+
+                    <div class="convergence-type">
+                        <h4>💪 Convergence in Lᵖ</h4>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                            Xₙ →ᴸᵖ X if:
+                            <br>lim E[|Xₙ - X|ᵖ] = 0
+                        </div>
+                        <p><strong>Special cases:</strong></p>
+                        <ul>
+                            <li>p=1: Mean convergence</li>
+                            <li>p=2: Mean square convergence</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Relationships Between Convergences</h2>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Stronger Type</th>
+                        <th>Implies</th>
+                        <th>Weaker Type</th>
+                        <th>Example</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Almost Sure</strong></td>
+                        <td>⟹</td>
+                        <td><strong>In Probability</strong></td>
+                        <td>Strong Law of Large Numbers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>In Probability</strong></td>
+                        <td>⟹</td>
+                        <td><strong>In Distribution</strong></td>
+                        <td>Sample mean to constant</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lᵖ Convergence</strong></td>
+                        <td>⟹</td>
+                        <td><strong>In Probability</strong></td>
+                        <td>Bounded random variables</td>
+                    </tr>
+                    <tr>
+                        <td><strong>L² Convergence</strong></td>
+                        <td>⟹</td>
+                        <td><strong>L¹ Convergence</strong></td>
+                        <td>When second moments exist</td>
+                    </tr>
+                </table>
+
+                <div class="theorem-box">
+                    <h4>⚠️ Important Note</h4>
+                    <p><strong>Convergence in distribution does NOT imply convergence in probability</strong> unless the limit is a constant!</p>
+                    <div class="example-box" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                        <h4>🎲 Counterexample</h4>
+                        <p>Let X ~ N(0,1) and Xₙ = X for all n</p>
+                        <p>Then Xₙ ⇒ N(0,1), but Xₙ does not converge to X in probability!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚖️ Laws of Large Numbers</h2>
+
+                <div class="law-box">
+                    <h4>📊 Weak Law of Large Numbers (WLLN)</h4>
+                    <p>For iid random variables X₁, X₂, ... with E[Xᵢ] = μ and finite variance:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        X̄ₙ = (1/n)∑ᵢ₌₁ⁿ Xᵢ →ᵖ μ
+                    </div>
+                    <p><strong>Interpretation:</strong> Sample average converges in probability to population mean</p>
+                </div>
+
+                <div class="law-box">
+                    <h4>🔒 Strong Law of Large Numbers (SLLN)</h4>
+                    <p>Under the same conditions:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        X̄ₙ →ᵃ·ˢ· μ
+                    </div>
+                    <p><strong>Interpretation:</strong> Sample average converges almost surely to population mean</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎰 Casino Example</h4>
+                    <p><strong>Setup:</strong> Playing a game where you win $1 with probability 0.4 and lose $1 with probability 0.6</p>
+                    <p><strong>Expected value per game:</strong> E[X] = 1(0.4) + (-1)(0.6) = -0.2</p>
+                    <p><strong>SLLN says:</strong> Your average winnings per game will approach -$0.20 as you play more games</p>
+                    <p><strong>Practical meaning:</strong> The house edge guarantees long-term profit for the casino!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔔 Central Limit Theorem</h2>
+
+                <div class="theorem-box">
+                    <h4>🌟 The Most Important Theorem in Statistics!</h4>
+                    <p>For iid random variables X₁, X₂, ... with E[Xᵢ] = μ and Var(Xᵢ) = σ² < ∞:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        √n(X̄ₙ - μ)/σ ⇒ N(0,1)
+                    </div>
+                    <p><strong>Equivalently:</strong></p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        X̄ₙ ≈ N(μ, σ²/n) for large n
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>🎲 Dice Rolling Demonstration</h4>
+                    <p><strong>Single die roll:</strong> X ~ Uniform{1,2,3,4,5,6}</p>
+                    <p><strong>Mean:</strong> μ = 3.5, <strong>Variance:</strong> σ² = 35/12 ≈ 2.92</p>
+                    <p><strong>Average of n dice:</strong> X̄ₙ ≈ N(3.5, 2.92/n)</p>
+                    
+                    <div class="visual-demo">
+                        <h4>🎯 Sample Size Effects</h4>
+                        <p><strong>n = 1:</strong> Uniform distribution (flat)</p>
+                        <p><strong>n = 10:</strong> Starting to look bell-shaped</p>
+                        <p><strong>n = 100:</strong> Very close to normal curve</p>
+                        <p><strong>n = 1000:</strong> Essentially normal</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>📊 Practical Applications</h4>
+                        <ul>
+                            <li><strong>Polling:</strong> Sample proportions are approximately normal</li>
+                            <li><strong>Quality control:</strong> Average measurements follow normal distribution</li>
+                            <li><strong>Finance:</strong> Returns often modeled as normal (with caveats!)</li>
+                            <li><strong>Biology:</strong> Measurement errors are approximately normal</li>
+                        </ul>
+                    </div>
+
+                    <div class="theorem-box">
+                        <h4>🎯 Key Insights</h4>
+                        <ul>
+                            <li><strong>Shape doesn't matter:</strong> Original distribution can be anything!</li>
+                            <li><strong>Rate:</strong> Convergence speed is √n</li>
+                            <li><strong>Universality:</strong> Same normal limit for all distributions</li>
+                            <li><strong>Practical rule:</strong> n ≥ 30 often sufficient</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Slutsky's Theorem</h2>
+
+                <div class="theorem-box">
+                    <h4>🔧 Powerful Tool for Combining Convergences</h4>
+                    <p>If Xₙ ⇒ X and Yₙ →ᵖ c (constant), then:</p>
+                    <ul>
+                        <li><strong>Addition:</strong> Xₙ + Yₙ ⇒ X + c</li>
+                        <li><strong>Multiplication:</strong> XₙYₙ ⇒ cX</li>
+                        <li><strong>Division:</strong> Xₙ/Yₙ ⇒ X/c (if c ≠ 0)</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>📈 Application: Sample Standard Deviation</h4>
+                    <p><strong>Problem:</strong> We know √n(X̄ₙ - μ)/σ ⇒ N(0,1), but σ is unknown</p>
+                    <p><strong>Solution:</strong> Replace σ with sample standard deviation Sₙ</p>
+                    <div class="formula-box">
+                        Since Sₙ →ᵖ σ, by Slutsky's theorem:
+                        <br>√n(X̄ₙ - μ)/Sₙ ⇒ N(0,1)
+                    </div>
+                    <p><strong>Result:</strong> This gives us the foundation for t-tests and confidence intervals!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Delta Method</h2>
+
+                <div class="theorem-box">
+                    <h4>🔄 Convergence Under Smooth Transformations</h4>
+                    <p>If √n(X̄ₙ - μ) ⇒ N(0, σ²) and g is differentiable at μ with g'(μ) ≠ 0, then:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        √n(g(X̄ₙ) - g(μ)) ⇒ N(0, [g'(μ)]²σ²)
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>💰 Finance Application: Portfolio Variance</h4>
+                    <p><strong>Setup:</strong> Sample variance S²ₙ →ᵖ σ² and √n(S²ₙ - σ²) ⇒ N(0, τ²)</p>
+                    <p><strong>Want:</strong> Distribution of standard deviation Sₙ = √S²ₙ</p>
+                    <p><strong>Delta method with g(x) = √x:</strong></p>
+                    <div class="formula-box">
+                        g'(σ²) = 1/(2σ)
+                        <br>√n(Sₙ - σ) ⇒ N(0, τ²/(4σ²))
+                    </div>
+                    <p><strong>Application:</strong> Confidence intervals for portfolio risk!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📡 Characteristic Functions and Convergence</h2>
+
+                <div class="theorem-box">
+                    <h4>📊 Lévy Continuity Theorem</h4>
+                    <p>If φₙ(t) → φ(t) pointwise and φ is continuous at 0, then Xₙ ⇒ X where φ is the characteristic function of X.</p>
+                    <p><strong>Key insight:</strong> Convergence in distribution ⟺ pointwise convergence of characteristic functions</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔬 Applications</h4>
+                    <ul>
+                        <li><strong>Proving CLT:</strong> Show characteristic function of normalized sum converges to that of standard normal</li>
+                        <li><strong>Sum of independent variables:</strong> φₓ₊ᵧ(t) = φₓ(t)φᵧ(t) when X, Y independent</li>
+                        <li><strong>Moment generating functions:</strong> Similar results for MGFs when they exist</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Advanced Topics</h2>
+
+                <div class="grid-3">
+                    <div class="convergence-type">
+                        <h4>🏃 Rates of Convergence</h4>
+                        <p><strong>Berry-Esseen Theorem:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            sup |P(√n(X̄ₙ-μ)/σ ≤ x) - Φ(x)| ≤ C·E[|X₁-μ|³]/(σ³√n)
+                        </div>
+                        <p><strong>Rate:</strong> O(n^(-1/2)) convergence to normal distribution</p>
+                    </div>
+
+                    <div class="convergence-type">
+                        <h4>🌊 Functional CLT</h4>
+                        <p><strong>Donsker's Theorem:</strong> Partial sum process converges to Brownian motion</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            Sₙ(t) = (1/√n)∑ᵢ₌₁^⌊nt⌋ (Xᵢ-μ)/σ ⇒ W(t)
+                        </div>
+                        <p><strong>Applications:</strong> Kolmogorov-Smirnov test, empirical processes</p>
+                    </div>
+
+                    <div class="convergence-type">
+                        <h4>🎯 Large Deviations</h4>
+                        <p><strong>Cramér's Theorem:</strong> Exponential decay of tail probabilities</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            lim (1/n)log P(X̄ₙ > x) = -I(x)
+                        </div>
+                        <p><strong>Rate function:</strong> I(x) > 0 for x ≠ μ</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Exchangeability and de Finetti's Theorem</h2>
+
+                <div class="theorem-box">
+                    <h4>🔄 Exchangeable Sequences</h4>
+                    <p>X₁, X₂, ... are <strong>exchangeable</strong> if finite permutations don't change joint distribution.</p>
+                </div>
+
+                <div class="law-box">
+                    <h4>👑 de Finetti's Theorem</h4>
+                    <p>Infinite exchangeable sequence of 0-1 variables can be represented as:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(X₁=x₁,...,Xₙ=xₙ) = ∫₀¹ ∏ᵢ₌₁ⁿ p^xᵢ(1-p)^(1-xᵢ) dμ(p)
+                    </div>
+                    <p><strong>Interpretation:</strong> Exchangeable sequences behave like iid conditional on random parameter</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🧬 Applications</h4>
+                    <ul>
+                        <li><strong>Bayesian statistics:</strong> Foundation for Bayesian inference</li>
+                        <li><strong>Species sampling:</strong> Dirichlet process models</li>
+                        <li><strong>Network analysis:</strong> Random graph models</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌊 Ergodic Theory</h2>
+
+                <div class="theorem-box">
+                    <h4>⚡ Birkhoff's Ergodic Theorem</h4>
+                    <p>For ergodic stationary sequence:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        (1/n)∑ᵢ₌₁ⁿ f(Xᵢ) →ᵃ·ˢ· E[f(X₁)]
+                    </div>
+                    <p><strong>Interpretation:</strong> Time averages equal ensemble averages</p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🔄 Applications</h4>
+                    <ul>
+                        <li><strong>Time series analysis:</strong> Long-run behavior</li>
+                        <li><strong>Markov chains:</strong> Limiting distributions</li>
+                        <li><strong>Dynamical systems:</strong> Orbit averages</li>
+                        <li><strong>Information theory:</strong> Entropy rates</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌪️ Extreme Value Theory</h2>
+
+                <div class="theorem-box">
+                    <h4>📊 Types of Extreme Value Distributions</h4>
+                    <p>Let Mₙ = max{X₁, ..., Xₙ}. Under appropriate normalization:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P((Mₙ - bₙ)/aₙ ≤ x) → G(x)
+                    </div>
+                    <p>where G is one of three types:</p>
+                    <ul>
+                        <li><strong>Gumbel:</strong> G(x) = exp(-e^(-x))</li>
+                        <li><strong>Fréchet:</strong> G(x) = exp(-x^(-α)) for x > 0</li>
+                        <li><strong>Weibull:</strong> G(x) = exp(-(-x)^α) for x < 0</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>🌊 Applications</h4>
+                    <ul>
+                        <li><strong>Risk management:</strong> Value at risk calculations</li>
+                        <li><strong>Engineering:</strong> Reliability analysis</li>
+                        <li><strong>Climate science:</strong> Extreme weather events</li>
+                        <li><strong>Finance:</strong> Tail risk modeling</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Applications in Statistics</h2>
+
+                <div class="grid-2">
+                    <div class="example-box">
+                        <h4>🎯 Consistency of Estimators</h4>
+                        <p><strong>Weak consistency:</strong> θ̂ₙ →ᵖ θ</p>
+                        <p><strong>Strong consistency:</strong> θ̂ₙ →ᵃ·ˢ· θ</p>
+                        <p><strong>Example:</strong> Sample mean is strongly consistent for population mean</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 Asymptotic Normality</h4>
+                        <p><strong>Definition:</strong> √n(θ̂ₙ - θ) ⇒ N(0, σ²)</p>
+                        <p><strong>Applications:</strong></p>
+                        <ul>
+                            <li>Confidence intervals</li>
+                            <li>Hypothesis tests</li>
+                            <li>Efficiency comparisons</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🔬 Statistical Inference Applications</h4>
+                    <ul>
+                        <li><strong>Maximum likelihood estimators:</strong> Asymptotic normality</li>
+                        <li><strong>Bootstrap methods:</strong> Consistency theory</li>
+                        <li><strong>Empirical processes:</strong> Uniform convergence</li>
+                        <li><strong>Test statistics:</strong> Null distributions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Pitfalls</h2>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>❌ Confusing convergence types</h4>
+                        <p><strong>Problem:</strong> Each type has different implications</p>
+                        <p><strong>Solution:</strong> Always specify which type you mean</p>
+                        <p><strong>Remember:</strong> Stronger types imply weaker ones, but not vice versa</p>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>❌ Applying CLT too early</h4>
+                        <p><strong>Problem:</strong> "n = 30 rule" is just a rough guideline</p>
+                        <p><strong>Reality:</strong> Depends on underlying distribution</p>
+                        <p><strong>Skewed data:</strong> May need much larger n</p>
+                    </div>
+                </div>
+
+                <div class="pitfall-box">
+                    <h4>❌ Ignoring regularity conditions</h4>
+                    <p><strong>Problem:</strong> Many theorems require technical conditions (finite variance, differentiability, etc.)</p>
+                    <p><strong>Solution:</strong> Always check assumptions before applying results</p>
+                    <p><strong>Example:</strong> CLT requires finite variance - fails for Cauchy distribution!</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="pitfall-box">
+                        <h4>❌ Finite sample vs asymptotic</h4>
+                        <p><strong>Problem:</strong> Asymptotic results may not apply to small samples</p>
+                        <p><strong>Solution:</strong> Use exact methods when possible</p>
+                    </div>
+
+                    <div class="pitfall-box">
+                        <h4>❌ Independence assumptions</h4>
+                        <p><strong>Problem:</strong> Many results require careful verification of conditions</p>
+                        <p><strong>Solution:</strong> Check dependence structure carefully</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Connections to Other Topics</h2>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>📊 To Inequalities (Chapter 5)</h4>
+                        <ul>
+                            <li>Concentration inequalities</li>
+                            <li>Probability bounds</li>
+                            <li>Tail bounds for sums</li>
+                            <li>Martingale inequalities</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Estimating CDF (Chapter 8)</h4>
+                        <ul>
+                            <li>Glivenko-Cantelli theorem</li>
+                            <li>Empirical processes</li>
+                            <li>Uniform convergence</li>
+                            <li>Kolmogorov-Smirnov test</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>🎲 To Bootstrap (Chapter 9)</h4>
+                        <ul>
+                            <li>Consistency of bootstrap</li>
+                            <li>Convergence of bootstrap distributions</li>
+                            <li>Bootstrap approximation theory</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="example-box">
+                        <h4>🔬 To Inference (Chapters 10-11)</h4>
+                        <ul>
+                            <li>Asymptotic normality of estimators</li>
+                            <li>Consistency of tests</li>
+                            <li>Large sample theory</li>
+                            <li>Likelihood ratio tests</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 To Regression (Chapters 14-15)</h4>
+                        <ul>
+                            <li>Asymptotic properties of least squares</li>
+                            <li>Consistency of estimators</li>
+                            <li>Central limit theorems for regression</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📈 To Time Series (Chapter 18)</h4>
+                        <ul>
+                            <li>Limit theorems for dependent sequences</li>
+                            <li>Ergodic theory applications</li>
+                            <li>Martingale central limit theorems</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Summary and Key Takeaways</h2>
+
+                <div class="law-box">
+                    <h4>🎯 Main Messages</h4>
+                    <ul>
+                        <li><strong>Foundation of statistics:</strong> Convergence underlies all asymptotic theory</li>
+                        <li><strong>Multiple types:</strong> Each convergence mode has different implications</li>
+                        <li><strong>CLT is central:</strong> Normal approximations are everywhere in statistics</li>
+                        <li><strong>LLN provides consistency:</strong> Sample averages approach population means</li>
+                        <li><strong>Tools for transformations:</strong> Delta method, continuous mapping, Slutsky's theorem</li>
+                        <li><strong>Advanced theory:</strong> Functional CLT, large deviations, extreme values</li>
+                    </ul>
+                </div>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Big Picture</h4>
+                    <p>Convergence theory bridges the gap between finite sample statistics and limiting behavior. It provides the mathematical foundation that justifies why statistical methods work, when they work, and how well they work.</p>
+                    <p><strong>Without convergence theory, we couldn't:</strong></p>
+                    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <li>Know that larger samples give better estimates</li>
+                        <li>Construct confidence intervals</li>
+                        <li>Perform hypothesis tests</li>
+                        <li>Understand when normal approximations are valid</li>
+                        <li>Justify bootstrap methods</li>
+                    </ul>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎓 For Further Study</h4>
+                    <p>This chapter provides the essential foundation, but convergence theory goes much deeper:</p>
+                    <ul>
+                        <li><strong>Measure theory:</strong> Rigorous foundations</li>
+                        <li><strong>Stochastic processes:</strong> Continuous-time convergence</li>
+                        <li><strong>Empirical processes:</strong> Uniform convergence theory</li>
+                        <li><strong>Weak convergence:</strong> Convergence in function spaces</li>
+                        <li><strong>High-dimensional probability:</strong> Modern concentration inequalities</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 5: Inequalities</a>
+            <a href="#" class="nav-btn">Chapter 7: Statistical Inference →</a>
+        </div>
+    </div>
+</body>
+</html>

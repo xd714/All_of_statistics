@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Course - Table of Contents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '📊📈📉📋📊';
+            position: absolute;
+            top: 50%;
+            left: -25%;
+            transform: translateY(-50%);
+            font-size: 4em;
+            opacity: 0.1;
+            animation: float-stats 20s linear infinite;
+        }
+
+        @keyframes float-stats {
+            0% { left: -25%; }
+            100% { left: 125%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .intro h2 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+        }
+
+        .intro p {
+            font-size: 1.1em;
+            color: #34495e;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .chapter-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .chapter-card h3 {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .chapter-card p {
+            color: #34495e;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .chapter-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            font-size: 0.9em;
+        }
+
+        .chapter-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .section-divider {
+            text-align: center;
+            margin: 50px 0;
+            position: relative;
+        }
+
+        .section-divider h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-divider::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            text-align: center;
+            padding: 30px;
+            color: #2c3e50;
+        }
+
+        .footer p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .course-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .part-foundations {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .part-inference {
+            background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);
+        }
+
+        .part-models {
+            background: linear-gradient(135deg, #ffd6cc 0%, #ffc1cc 100%);
+        }
+
+        .part-advanced {
+            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 All of Statistics</h1>
+            <p>Complete Course: Probability Theory and Statistical Inference</p>
+        </div>
+
+        <div class="content">
+            <div class="intro">
+                <h2>Welcome to All of Statistics</h2>
+                <p>This comprehensive course covers essential concepts from basic probability to advanced statistical methods. Each chapter builds upon previous concepts to provide a complete understanding of modern statistical theory and practice.</p>
+            </div>
+
+            <div class="course-stats">
+                <div class="stat-box">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">Chapters</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Applications</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">20+</div>
+                    <div class="stat-label">Available Now</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">⭐</div>
+                    <div class="stat-label">Quality</div>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <h2>Part I: Probability Foundations</h2>
+            </div>
+
+            <div class="chapters-grid">
+                <div class="chapter-card part-foundations">
+                    <h3>📚 Chapter 1: Introduction to Statistics</h3>
+                    <p>Fundamental concepts, probability axioms, random variables, and mathematical prerequisites.</p>
+                    <a href="chapter01.html" class="chapter-link">Enter Chapter 1 →</a>
+                </div>
+
+                <div class="chapter-card part-foundations">
+                    <h3>🎯 Chapter 2: Probability</h3>
+                    <p>Basic probability theory, conditional probability, independence, and Bayes' theorem.</p>
+                    <a href="chapter02.html" class="chapter-link">Enter Chapter 2 →</a>
+                </div>
+
+                <div class="chapter-card part-foundations">
+                    <h3>🎲 Chapter 3: Random Variables</h3>
+                    <p>Discrete and continuous distributions, PDFs, PMFs, and moment generating functions.</p>
+                    <a href="chapter03.html" class="chapter-link">Enter Chapter 3 →</a>
+                </div>
+
+                <div class="chapter-card part-foundations">
+                    <h3>📊 Chapter 4: Expectation</h3>
+                    <p>Expected values, variance, covariance, and properties of expectation operator.</p>
+                    <a href="chapter04.html" class="chapter-link">Enter Chapter 4 →</a>
+                </div>
+
+                <div class="chapter-card part-foundations">
+                    <h3>⚖️ Chapter 5: Inequalities</h3>
+                    <p>Markov, Chebyshev, and other fundamental probability inequalities.</p>
+                    <a href="chapter05.html" class="chapter-link">Enter Chapter 5 →</a>
+                </div>
+
+                <div class="chapter-card part-foundations">
+                    <h3>🔄 Chapter 6: Convergence of Random Variables</h3>
+                    <p>Modes of convergence, law of large numbers, and central limit theorem.</p>
+                    <a href="chapter06_1.html" class="chapter-link">Enter Chapter 6 →</a>
+                     <a href="chapter06_2.html" class="chapter-link">Enter Chapter 6 →</a>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <h2>Part II: Statistical Inference</h2>
+            </div>
+
+            <div class="chapters-grid">
+                <div class="chapter-card part-inference">
+                    <h3>🎯 Chapter 7: Statistical Inference</h3>
+                    <p>Point estimation, confidence intervals, and fundamental inference concepts.</p>
+                    <a href="chapter07.html" class="chapter-link">Enter Chapter 7 →</a>
+                </div>
+
+                <div class="chapter-card part-inference">
+                    <h3>📈 Chapter 8: Empirical Distributions</h3>
+                    <p>Empirical CDFs, Kolmogorov-Smirnov tests, and nonparametric methods.</p>
+                    <a href="chapter08.html" class="chapter-link">Enter Chapter 8 →</a>
+                </div>
+
+                <div class="chapter-card part-inference">
+                    <h3>🔄 Chapter 9: Bootstrap</h3>
+                    <p>Bootstrap methodology, resampling techniques, and bootstrap confidence intervals.</p>
+                    <a href="chapter09.html" class="chapter-link">Enter Chapter 9 →</a>
+                </div>
+
+                <div class="chapter-card part-inference">
+                    <h3>📊 Chapter 10: Parametric Inference</h3>
+                    <p>Maximum likelihood estimation, Fisher information, and parametric methods.</p>
+                    <a href="chapter10.html" class="chapter-link">Enter Chapter 10 →</a>
+                </div>
+
+                <div class="chapter-card part-inference">
+                    <h3>🧪 Chapter 11: Hypothesis Testing</h3>
+                    <p>Statistical tests, p-values, power analysis, and multiple testing.</p>
+                    <a href="chapter11.html" class="chapter-link">Enter Chapter 11 →</a>
+                </div>
+
+                <div class="chapter-card part-inference">
+                    <h3>🧠 Chapter 12: Bayesian Inference</h3>
+                    <p>Bayesian paradigm, prior/posterior distributions, and Bayesian methods.</p>
+                    <a href="chapter12.html" class="chapter-link">Enter Chapter 12 →</a>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <h2>Part III: Statistical Models</h2>
+            </div>
+
+            <div class="chapters-grid">
+                <div class="chapter-card part-models">
+                    <h3>⚖️ Chapter 13: Decision Theory</h3>
+                    <p>Statistical decision theory, loss functions, and optimal decision rules.</p>
+                    <a href="chapter13.html" class="chapter-link">Enter Chapter 13 →</a>
+                </div>
+
+                <div class="chapter-card part-models">
+                    <h3>📈 Chapter 14: Linear Regression</h3>
+                    <p>Simple and multiple regression, least squares, and regression diagnostics.</p>
+                    <a href="chapter14.html" class="chapter-link">Enter Chapter 14 →</a>
+                </div>
+
+                <div class="chapter-card part-models">
+                    <h3>📊 Chapter 15: Multiple Regression</h3>
+                    <p>Advanced regression topics, model selection, and multicollinearity.</p>
+                    <a href="chapter15.html" class="chapter-link">Enter Chapter 15 →</a>
+                </div>
+
+                <div class="chapter-card part-models">
+                    <h3>🔗 Chapter 16: Logistic Regression</h3>
+                    <p>Generalized linear models, logistic regression, and classification.</p>
+                    <a href="chapter16.html" class="chapter-link">Enter Chapter 16 →</a>
+                </div>
+
+                <div class="chapter-card part-models">
+                    <h3>📊 Chapter 17: Nonparametric Regression</h3>
+                    <p>Kernel methods, splines, and nonparametric smoothing techniques.</p>
+                    <a href="chapter17.html" class="chapter-link">Enter Chapter 17 →</a>
+                </div>
+
+                <div class="chapter-card part-models">
+                    <h3>📅 Chapter 18: Time Series Analysis</h3>
+                    <p>ARIMA models, stationarity, and forecasting for temporal data.</p>
+                    <a href="chapter18.html" class="chapter-link">Enter Chapter 18 →</a>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <h2>Part IV: Advanced Topics</h2>
+            </div>
+
+            <div class="chapters-grid">
+                <div class="chapter-card part-advanced">
+                    <h3>⏱️ Chapter 19: Survival Analysis</h3>
+                    <p>Survival functions, hazard rates, and time-to-event data analysis.</p>
+                    <a href="chapter19.html" class="chapter-link">Enter Chapter 19 →</a>
+                </div>
+
+                <div class="chapter-card part-advanced">
+                    <h3>🔗 Chapter 20: Causality</h3>
+                    <p>Causal inference, DAGs, and methods for causal analysis.</p>
+                    <a href="chapter20.html" class="chapter-link">Enter Chapter 20 →</a>
+                </div>
+
+                <div class="chapter-card part-advanced">
+                    <h3>∞ Chapter 21: High-Dimensional Statistics</h3>
+                    <p>Regularization, sparsity, and statistical methods for high-dimensional data.</p>
+                    <a href="chapter21.html" class="chapter-link">Enter Chapter 21 →</a>
+                </div>
+
+                <div class="chapter-card part-advanced">
+                    <h3>🌊 Chapter 22: Smoothing Methods</h3>
+                    <p>Basis expansions, wavelets, and advanced smoothing techniques.</p>
+                    <a href="chapter22.html" class="chapter-link">Enter Chapter 22 →</a>
+                    <a href="chapter22_2.html" class="chapter-link">Enter Chapter 22 →</a>
+                </div>
+
+                <div class="chapter-card part-advanced">
+                    <h3>🎯 Chapter 23: Classification</h3>
+                    <p>Classification methods, decision boundaries, and machine learning approaches.</p>
+                    <a href="chapter23.html" class="chapter-link">Enter Chapter 23 →</a>
+                </div>
+
+                <div class="chapter-card part-advanced">
+                    <h3>🎲 Chapter 24: Simulation Methods</h3>
+                    <p>Monte Carlo methods, MCMC, and computational statistical techniques.</p>
+                    <a href="chapter24.html" class="chapter-link">Enter Chapter 24 →</a>
+                </div>
+            </div>
+
+            <div class="section-divider">
+                <h2>Additional Resources</h2>
+            </div>
+
+            <div class="chapters-grid">
+                <div class="chapter-card" style="background: linear-gradient(135deg, #e0c3fc 0%, #9bb5ff 100%);">
+                    <h3>📖 Course Notes & Guides</h3>
+                    <p>Supplementary materials, detailed derivations, and extended examples for deeper understanding.</p>
+                    <a href="#" class="chapter-link">View Resources →</a>
+                </div>
+
+                <div class="chapter-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <h3>🧮 Practice Problems</h3>
+                    <p>Exercises, solutions, and additional practice problems to reinforce key concepts.</p>
+                    <a href="#" class="chapter-link">Practice Now →</a>
+                </div>
+
+                <div class="chapter-card" style="background: linear-gradient(135deg, #ffd6cc 0%, #ffc1cc 100%);">
+                    <h3>🔬 Applied Examples</h3>
+                    <p>Real-world applications and case studies demonstrating statistical methods in practice.</p>
+                    <a href="#" class="chapter-link">Explore Examples →</a>
+                </div>
+
+                <div class="chapter-card" style="background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);">
+                    <h3>💻 R/Python Code</h3>
+                    <p>Implementation examples and computational tools for statistical analysis.</p>
+                    <a href="#" class="chapter-link">View Code →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>All of Statistics</strong> - A comprehensive journey through probability and statistical inference</p>
+            <p>Navigate through chapters using the links above • All major chapters are now available!</p>
+        </div>
+    </div>
+</body>
+</html>
