@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: Probability Inequalities</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '≤≥≤≥≤≥≤≥≤≥';
+            position: absolute;
+            top: 50%;
+            left: -20%;
+            transform: translateY(-50%);
+            font-size: 6em;
+            opacity: 0.1;
+            animation: scroll 15s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { left: -20%; }
+            100% { left: 120%; }
+        }
+
+        .header h1 {
+            position: relative;
+            z-index: 1;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            position: relative;
+            z-index: 1;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            right: -100%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.1; }
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section h3 {
+            color: #34495e;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-by-step {
+            background: linear-gradient(135deg, #81ecec 0%, #74b9ff 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #0984e3;
+            box-shadow: 0 10px 20px rgba(9, 132, 227, 0.2);
+        }
+
+        .step-by-step h4 {
+            color: #2d3436;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid rgba(45, 52, 54, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #0984e3;
+        }
+
+        .step h5 {
+            color: #2d3436;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .inequality-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .inequality-type::before {
+            content: '≤';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.3;
+        }
+
+        .inequality-type:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .inequality-type h4 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #f39c12;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .formula-box::before {
+            content: '∀ε>0';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.2em;
+            opacity: 0.3;
+            color: #d35400;
+            font-style: italic;
+        }
+
+        .simple-example {
+            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 2px solid #e84393;
+            box-shadow: 0 8px 20px rgba(232, 67, 147, 0.2);
+            position: relative;
+        }
+
+        .simple-example h4 {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .calculation-box {
+            background: rgba(255, 255, 255, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #e84393;
+        }
+
+        .comparison-highlight {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .advanced-example {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(162, 155, 254, 0.3);
+        }
+
+        .advanced-example h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .visual-demo {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #f39c12;
+            text-align: center;
+        }
+
+        .bound-hierarchy {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .bound-hierarchy .arrow {
+            color: #e67e22;
+            font-size: 2em;
+        }
+
+        .bound-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 5px;
+            min-width: 120px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .bound-item:hover {
+            transform: scale(1.05);
+        }
+
+        .interactive-demo {
+            background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 15px 30px rgba(255, 118, 117, 0.3);
+        }
+
+        .interactive-demo h4 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .theorem-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: '∃δ>0';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5em;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .theorem-box h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+
+            .bound-hierarchy {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 5: Probability Inequalities</h1>
+            <p>Essential Tools for Controlling Randomness and Uncertainty</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>🎯 What Are Probability Inequalities?</h2>
+                <p>Probability inequalities are mathematical tools that give us <strong>bounds</strong> on probabilities without knowing the exact distribution. They're like having a safety net - they tell us the <em>worst case scenario</em> for how likely certain events are.</p>
+                
+                <div class="simple-example">
+                    <h4>🌟 Everyday Example</h4>
+                    <p><strong>Scenario:</strong> You're waiting for a bus. You know the average wait time is 10 minutes, but you don't know the exact schedule.</p>
+                    <p><strong>Question:</strong> What's the probability you'll wait more than 30 minutes?</p>
+                    <div class="calculation-box">
+                        <strong>Answer using Markov's Inequality:</strong><br>
+                        P(Wait ≥ 30 min) ≤ Average Wait / 30 = 10/30 = 1/3 ≈ 33%
+                    </div>
+                    <div class="comparison-highlight">
+                        Without knowing the exact distribution, we can say: "At most 33% chance of waiting more than 30 minutes"
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📏 Markov's Inequality - The Simplest Tool</h2>
+
+                <div class="inequality-type">
+                    <h4>📝 The Formula</h4>
+                    <div class="formula-box">
+                        For any non-negative random variable X and any a > 0:
+                        <br><strong>P(X ≥ a) ≤ E[X]/a</strong>
+                    </div>
+                    <p><strong>In Words:</strong> The probability that X is at least a is at most the expected value divided by a.</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🔍 Step-by-Step Example: Rolling a Die</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: Setup</h5>
+                        <p>Roll a fair 6-sided die. Let X = outcome (1, 2, 3, 4, 5, or 6)</p>
+                        <div class="calculation-box">
+                            E[X] = (1+2+3+4+5+6)/6 = 21/6 = 3.5
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Apply Markov's Inequality</h5>
+                        <p>What's P(X ≥ 5)?</p>
+                        <div class="calculation-box">
+                            P(X ≥ 5) ≤ E[X]/5 = 3.5/5 = 0.7
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 3: Compare with Exact Answer</h5>
+                        <p>Actual: P(X ≥ 5) = P(X=5 or X=6) = 2/6 ≈ 0.33</p>
+                        <div class="comparison-highlight">
+                            Markov bound: ≤ 0.7 | Actual: 0.33 | The bound works but is loose!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interactive-demo">
+                    <h4>🎲 Why is Markov's Bound Loose?</h4>
+                    <p><strong>Key Insight:</strong> Markov only uses the mean, ignoring how spread out the data is. It's very general but often gives loose bounds.</p>
+                    <p><strong>When is it useful?</strong> When you only know the average and need a quick bound!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Chebyshev's Inequality - Adding Variance Information</h2>
+
+                <div class="inequality-type">
+                    <h4>📈 The Upgrade</h4>
+                    <div class="formula-box">
+                        For any random variable X with mean μ and variance σ²:
+                        <br><strong>P(|X - μ| ≥ k) ≤ σ²/k²</strong>
+                        <br><strong>P(|X - μ| ≥ kσ) ≤ 1/k²</strong>
+                    </div>
+                    <p><strong>Key Improvement:</strong> Uses both mean AND variance for tighter bounds!</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🎯 Step-by-Step Example: Student Test Scores</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: Setup</h5>
+                        <p>Test scores have mean μ = 75 and standard deviation σ = 10</p>
+                        <div class="calculation-box">
+                            Mean = 75, Variance = σ² = 100
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Apply Chebyshev's Inequality</h5>
+                        <p>What's the probability a student scores outside 55-95 (±20 points)?</p>
+                        <div class="calculation-box">
+                            P(|Score - 75| ≥ 20) ≤ 100/400 = 1/4 = 0.25
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 3: Famous Result</h5>
+                        <p>At least 75% of students score within 2 standard deviations (55-95)</p>
+                        <div class="calculation-box">
+                            P(|Score - 75| ≥ 2×10) ≤ 1/2² = 1/4
+                            So P(|Score - 75| < 20) ≥ 1 - 1/4 = 0.75 = 75%
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 4: The Universal Truth</h5>
+                        <div class="comparison-highlight">
+                            This 75% rule works for ANY distribution - normal, uniform, exponential, etc.!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="simple-example">
+                    <h4>🔢 More Chebyshev Examples</h4>
+                    <div class="calculation-box">
+                        <strong>k = 3:</strong> At least 89% within 3σ (P ≥ 1 - 1/9 ≈ 0.89)<br>
+                        <strong>k = 4:</strong> At least 94% within 4σ (P ≥ 1 - 1/16 ≈ 0.94)<br>
+                        <strong>k = 5:</strong> At least 96% within 5σ (P ≥ 1 - 1/25 = 0.96)
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 Union Bound - Controlling Multiple Events</h2>
+
+                <div class="inequality-type">
+                    <h4>🎯 Boole's Inequality</h4>
+                    <div class="formula-box">
+                        P(A₁ ∪ A₂ ∪ ... ∪ Aₙ) ≤ P(A₁) + P(A₂) + ... + P(Aₙ)
+                    </div>
+                    <p><strong>In Words:</strong> Probability of any event happening ≤ sum of individual probabilities</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🧪 Step-by-Step Example: Medical Testing</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: The Problem</h5>
+                        <p>You run 100 medical tests, each with 5% chance of false positive</p>
+                        <div class="calculation-box">
+                            Each test: P(false positive) = 0.05
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Naive Thinking</h5>
+                        <p>"Each test is only 5% wrong, so 100 tests should be fine, right?"</p>
+                        <div class="comparison-highlight">
+                            WRONG! This ignores the multiple testing problem.
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 3: Apply Union Bound</h5>
+                        <p>What's P(at least one false positive)?</p>
+                        <div class="calculation-box">
+                            P(any false positive) ≤ 100 × 0.05 = 5.0
+                        </div>
+                        <p><strong>Wait!</strong> This bound is > 1, which means it's useless here!</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 4: The Real Calculation</h5>
+                        <p>Exact probability (assuming independence):</p>
+                        <div class="calculation-box">
+                            P(at least one false positive) = 1 - (0.95)¹⁰⁰ ≈ 1 - 0.006 ≈ 0.994
+                        </div>
+                        <div class="comparison-highlight">
+                            99.4% chance of at least one false positive! Much worse than naive 5%.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced-example">
+                    <h4>🏥 Bonferroni Correction - The Solution</h4>
+                    <p><strong>Problem:</strong> Control overall error rate at 5%</p>
+                    <p><strong>Solution:</strong> Use α/n for each test</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        Each test uses α = 0.05/100 = 0.0005
+                        Then P(any false positive) ≤ 100 × 0.0005 = 0.05 ✓
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Chernoff Bounds - Exponential Power</h2>
+
+                <div class="inequality-type">
+                    <h4>⚡ The Exponential Advantage</h4>
+                    <div class="formula-box">
+                        Basic idea: P(X ≥ a) ≤ inf_{t>0} E[e^{tX}]/e^{ta}
+                    </div>
+                    <p><strong>Key Insight:</strong> Use moment generating functions to get exponentially decaying bounds!</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🎰 Step-by-Step Example: Coin Flipping</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: Setup</h5>
+                        <p>Flip 100 fair coins. Let X = number of heads. We know E[X] = 50, Var(X) = 25</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Question</h5>
+                        <p>What's P(X ≥ 60)? (probability of 60+ heads)</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 3: Compare Different Bounds</h5>
+                        <div class="calculation-box">
+                            <strong>Markov:</strong> P(X ≥ 60) ≤ 50/60 ≈ 0.83 (useless!)<br>
+                            <strong>Chebyshev:</strong> P(|X-50| ≥ 10) ≤ 25/100 = 0.25<br>
+                            <strong>Chernoff:</strong> ≤ e^(-2) ≈ 0.135 (much better!)<br>
+                            <strong>Exact:</strong> ≈ 0.029 (using CLT)
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 4: The Takeaway</h5>
+                        <div class="comparison-highlight">
+                            Exponential bounds (Chernoff) are dramatically better than polynomial bounds (Markov/Chebyshev)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced-example">
+                    <h4>🎯 Hoeffding's Inequality - Practical Version</h4>
+                    <p>For independent bounded random variables X₁, ..., Xₙ with Xᵢ ∈ [aᵢ, bᵢ]:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        P(|Sₙ - E[Sₙ]| ≥ t) ≤ 2exp(-2t²/Σ(bᵢ-aᵢ)²)
+                    </div>
+                    <p><strong>Beautiful feature:</strong> Exponential decay in tail probability!</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Comparing All the Bounds</h2>
+
+                <div class="visual-demo">
+                    <h4>🏆 The Strength Hierarchy</h4>
+                    <p><em>More assumptions → Tighter bounds</em></p>
+                    
+                    <div class="bound-hierarchy">
+                        <div class="bound-item">Markov<br><small>Only mean</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Chebyshev<br><small>+ Variance</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Chernoff<br><small>+ MGF</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Hoeffding<br><small>+ Bounded</small></div>
+                    </div>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>📊 Real Comparison: Same Problem, All Methods</h4>
+                    
+                    <div class="step">
+                        <h5>Problem: Sum of 1000 coin flips</h5>
+                        <p>X = number of heads, E[X] = 500, Var(X) = 250</p>
+                        <p><strong>Question:</strong> P(X ≥ 550)?</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>All the Bounds:</h5>
+                        <div class="calculation-box">
+                            <strong>Markov:</strong> ≤ 500/550 ≈ 0.91 (terrible)<br>
+                            <strong>Chebyshev:</strong> ≤ 250/2500 = 0.1 (OK)<br>
+                            <strong>Chernoff:</strong> ≤ e^(-5) ≈ 0.007 (excellent)<br>
+                            <strong>Exact:</strong> ≈ 0.0008 (using CLT)
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>The Takeaway:</h5>
+                        <div class="comparison-highlight">
+                            Exponential bounds (Chernoff)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Advanced Example: Machine Learning Application</h2>
+
+                <div class="advanced-example">
+                    <h4>🤖 Generalization Bound Example</h4>
+                    <p><strong>Scenario:</strong> You train a classifier on 1000 examples and get 95% accuracy. How confident are you about real-world performance?</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🔬 Step-by-Step Analysis</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: Setup</h5>
+                        <p>Let R̂ = empirical risk (5% error on training), R = true risk (unknown)</p>
+                        <p>Each prediction is like a coin flip with some unknown success probability</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Apply Hoeffding's Inequality</h5>
+                        <div class="calculation-box">
+                            P(|R̂ - R| ≥ ε) ≤ 2exp(-2nε²)
+                            where n = 1000 samples
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 3: 95% Confidence Bound</h5>
+                        <p>Set 2exp(-2nε²) = 0.05 and solve for ε:</p>
+                        <div class="calculation-box">
+                            exp(-2000ε²) = 0.025
+                            -2000ε² = ln(0.025) ≈ -3.69
+                            ε² ≈ 0.00185
+                            ε ≈ 0.043
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 4: Interpretation</h5>
+                        <div class="comparison-highlight">
+                            With 95% confidence, true error rate is within ±4.3% of observed 5%
+                            So true error is between 0.7% and 9.3%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 When to Use Which Inequality</h2>
+
+                <div class="grid-3">
+                    <div class="simple-example">
+                        <h4>📏 Use Markov When:</h4>
+                        <ul>
+                            <li>Only know the mean</li>
+                            <li>Need a quick, rough bound</li>
+                            <li>Working with non-negative variables</li>
+                            <li>Other methods don't apply</li>
+                        </ul>
+                    </div>
+
+                    <div class="simple-example">
+                        <h4>📊 Use Chebyshev When:</h4>
+                        <ul>
+                            <li>Know mean and variance</li>
+                            <li>Distribution is unknown</li>
+                            <li>Need two-sided bounds</li>
+                            <li>Want distribution-free results</li>
+                        </ul>
+                    </div>
+
+                    <div class="simple-example">
+                        <h4>🚀 Use Chernoff/Hoeffding When:</h4>
+                        <ul>
+                            <li>Variables are independent</li>
+                            <li>Variables are bounded</li>
+                            <li>Need tight tail bounds</li>
+                            <li>Working with sums of many variables</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Common Mistakes and Pitfalls</h2>
+
+                <div class="grid-2">
+                    <div class="advanced-example" style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%);">
+                        <h4>❌ Wrong Tail Direction</h4>
+                        <p><strong>Mistake:</strong> Confusing P(X ≥ a) vs P(|X - μ| ≥ a)</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(|X| ≥ t) ≤ 2P(X ≥ t) for symmetric distributions
+                        </div>
+                        <p><strong>Fix:</strong> Always specify which tail you're bounding!</p>
+                    </div>
+
+                    <div class="advanced-example" style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%);">
+                        <h4>❌ Independence Assumptions</h4>
+                        <p><strong>Mistake:</strong> Using Hoeffding on dependent variables</p>
+                        <p><strong>Reality:</strong> Stock prices, weather data, etc. are often dependent</p>
+                        <p><strong>Fix:</strong> Use martingale inequalities or check for mixing conditions</p>
+                    </div>
+                </div>
+
+                <div class="advanced-example" style="background: linear-gradient(135deg, #e17055 0%, #d63031 100%);">
+                    <h4>❌ Trusting the Constants</h4>
+                    <p><strong>Problem:</strong> Inequality bounds often have large constants and can be very loose</p>
+                    <div class="step-by-step">
+                        <div class="step">
+                            <h5>Example: Chebyshev vs Reality</h5>
+                            <div class="calculation-box">
+                                Standard Normal: P(|X| ≥ 2) ≤ 1/4 = 25% (Chebyshev)
+                                Standard Normal: P(|X| ≥ 2) ≈ 4.5% (actual)
+                            </div>
+                            <p>Chebyshev overestimates by 5x!</p>
+                        </div>
+                    </div>
+                    <p><strong>Lesson:</strong> Use inequalities for qualitative insights, not precise predictions</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌟 Real-World Applications</h2>
+
+                <div class="grid-3">
+                    <div class="interactive-demo">
+                        <h4>💊 Drug Testing</h4>
+                        <p><strong>Challenge:</strong> Test 10,000 compounds, each 0.1% likely to be effective</p>
+                        <p><strong>Union Bound Application:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(find ≥1 effective drug) ≥ 1 - (0.999)^10000 ≈ 99.995%
+                        </div>
+                        <p>Almost guaranteed to find something!</p>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h4>📈 Finance Risk</h4>
+                        <p><strong>Portfolio Management:</strong> Daily returns, μ = 0.1%, σ = 2%</p>
+                        <p><strong>Chebyshev Application:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(|return - 0.1%| ≥ 6%) ≤ (2%)²/(6%)² = 1/9 ≈ 11%
+                        </div>
+                        <p>At most 11% chance of extreme daily moves</p>
+                    </div>
+
+                    <div class="interactive-demo">
+                        <h4>🎮 Game Design</h4>
+                        <p><strong>Balancing Randomness:</strong> Player gets random rewards</p>
+                        <p><strong>Hoeffding Application:</strong></p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            After 100 plays, total reward concentrates around expected value
+                            P(deviation ≥ 10% of expected) ≤ 2e^(-0.02×100) ≈ 0.3%
+                        </div>
+                        <p>Ensures consistent player experience!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎲 Martingale Inequalities - Sequential Processes</h2>
+
+                <div class="theorem-box">
+                    <h4>🌊 What's a Martingale?</h4>
+                    <p>A sequence where the expected future value equals the current value, given all past information.</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        E[M_{n+1} | M_1, M_2, ..., M_n] = M_n
+                    </div>
+                    <p><strong>Intuition:</strong> Like a fair gambling game - no advantage over time!</p>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🎰 Step-by-Step Example: Random Walk Gambling</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: Setup</h5>
+                        <p>Start with $100. Each round: win/lose $10 with equal probability</p>
+                        <div class="calculation-box">
+                            M_0 = 100, M_n = your money after n rounds
+                            E[M_{n+1} | past] = M_n (fair game)
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Apply Azuma's Inequality</h5>
+                        <p>Each step changes by at most $10, so c_i = 10 for all i</p>
+                        <p>After 100 rounds, what's P(|M_100 - 100| ≥ 150)?</p>
+                        <div class="calculation-box">
+                            P(|M_100 - 100| ≥ 150) ≤ 2exp(-150²/(2×100×10²))
+                            = 2exp(-22500/20000) = 2exp(-1.125) ≈ 0.65
+                        </div>
+                        <div class="comparison-highlight">
+                            At most 65% chance of being $150+ away from starting amount
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced-example">
+                    <h4>🧠 McDiarmid's Inequality - The Lipschitz Version</h4>
+                    <p><strong>Scenario:</strong> You have a function that doesn't change much when you change one input</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        If |f(x) - f(x')| ≤ c_i when x and x' differ only in position i:
+                        P(|f(X_1,...,X_n) - E[f]| ≥ t) ≤ 2exp(-2t²/Σc_i²)
+                    </div>
+                    
+                    <div class="simple-example">
+                        <h4>🃏 Card Example</h4>
+                        <p><strong>Setup:</strong> Draw 10 cards, f = number of different suits</p>
+                        <p><strong>Bounded difference:</strong> Changing one card changes f by at most 1</p>
+                        <div class="calculation-box">
+                            P(|f - E[f]| ≥ 2) ≤ 2exp(-2×4/(10×1)) = 2exp(-0.8) ≈ 0.9
+                        </div>
+                        <p>Number of different suits concentrates around its expectation!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧮 Matrix Concentration - High-Dimensional Power</h2>
+
+                <div class="theorem-box">
+                    <h4>🔢 Why Matrix Inequalities?</h4>
+                    <p>Modern data is high-dimensional. We need bounds on:</p>
+                    <ul>
+                        <li><strong>Sample covariance matrices</strong> (how close to true covariance?)</li>
+                        <li><strong>Random graph adjacency matrices</strong> (network properties)</li>
+                        <li><strong>Principal components</strong> (dimensionality reduction quality)</li>
+                    </ul>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>📊 Step-by-Step Example: Sample Covariance</h4>
+                    
+                    <div class="step">
+                        <h5>Step 1: The Setup</h5>
+                        <p>You have 1000 data points in 50 dimensions. You compute sample covariance matrix Ĉ</p>
+                        <div class="calculation-box">
+                            True covariance: C (unknown)
+                            Sample covariance: Ĉ = (1/n)Σ(x_i - x̄)(x_i - x̄)ᵀ
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h5>Step 2: Matrix Chernoff Bound</h5>
+                        <p>Suppose σ² = 1. What's P(λ_max(Ĉ - C) ≥ 0.5)?</p>
+                        <div class="calculation-box">
+                            P(λ_max(Ĉ - C) ≥ 0.5) ≤ 50·exp(-1000×0.25/2)
+                            = 50·exp(-125) ≈ 50 × 10⁻⁵⁵ ≈ 0
+                        </div>
+                        <div class="comparison-highlight">
+                            Extremely high confidence that largest eigenvalue is very close!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔮 Modern Extensions</h2>
+
+                <div class="theorem-box">
+                    <h4>🌊 Sub-Gaussian Random Variables</h4>
+                    <p>A random variable X is <strong>sub-Gaussian</strong> if its tails decay at least as fast as a Gaussian:</p>
+                    <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                        E[e^{t(X-E[X])}] ≤ e^{σ²t²/2}
+                    </div>
+                    <p><strong>Examples:</strong> Bounded variables, Gaussian variables, Rademacher variables (±1 with equal probability)</p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="advanced-example">
+                        <h4>🧮 Matrix Concentration</h4>
+                        <p><strong>Modern ML Problem:</strong> Random matrices (like data covariance)</p>
+                        <p><strong>Matrix Chernoff:</strong> Bounds on eigenvalues of random matrix sums</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(λ_max(Σ Xᵢ - E[Σ Xᵢ]) ≥ t) ≤ d·e^{-t²/(2σ²)}
+                        </div>
+                    </div>
+
+                    <div class="advanced-example">
+                        <h4>🎯 Empirical Process Theory</h4>
+                        <p><strong>DKW Inequality:</strong> How close is empirical CDF to true CDF?</p>
+                        <div class="formula-box" style="background: rgba(255,255,255,0.2);">
+                            P(sup_x |F̂_n(x) - F(x)| > ε) ≤ 2e^{-2nε²}
+                        </div>
+                        <p>Foundation of goodness-of-fit tests!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎮 Interactive Exercises</h2>
+
+                <div class="step-by-step">
+                    <h4>🧩 Practice Problem 1: Exam Scores</h4>
+                    
+                    <div class="step">
+                        <h5>Problem Setup</h5>
+                        <p>Final exam scores have mean 78 and standard deviation 12. Use inequalities to bound the probability that a randomly chosen student scores outside 54-102.</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Solution</h5>
+                        <div class="calculation-box">
+                            Range 54-102 = μ ± 24 = μ ± 2σ
+                            Using Chebyshev: P(|X - 78| ≥ 24) ≤ 144/576 = 1/4 = 25%
+                            So at least 75% score between 54-102
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-by-step">
+                    <h4>🎲 Practice Problem 2: Coin Concentration</h4>
+                    
+                    <div class="step">
+                        <h5>Problem Setup</h5>
+                        <p>Flip 400 fair coins. Bound the probability of getting 180 or fewer heads.</p>
+                    </div>
+
+                    <div class="step">
+                        <h5>Solution Comparison</h5>
+                        <div class="calculation-box">
+                            <strong>Chebyshev:</strong> P(|X-200| ≥ 20) ≤ 100/400 = 0.25
+                            <strong>Hoeffding:</strong> P(X ≤ 180) ≤ exp(-2×20²/400) = exp(-0.4) ≈ 0.67
+                            <strong>Normal approx:</strong> ≈ 0.023 (most accurate)
+                        </div>
+                        <div class="comparison-highlight">
+                            Hoeffding gives the better bound among inequalities!
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎓 Summary and Key Takeaways</h2>
+
+                <div class="visual-demo">
+                    <h4>🚀 The Big Picture</h4>
+                    <p>Probability inequalities are the <strong>mathematical safety net</strong> that lets us:</p>
+                    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                        <li>Bound probabilities without knowing exact distributions</li>
+                        <li>Control error rates in statistical procedures</li>
+                        <li>Prove convergence theorems (Law of Large Numbers, CLT)</li>
+                        <li>Design algorithms with performance guarantees</li>
+                        <li>Understand when and why statistical methods work</li>
+                    </ul>
+                </div>
+
+                <div class="interactive-demo">
+                    <h4>🎯 Practical Guidelines</h4>
+                    <div class="grid-2">
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                            <h5>✅ Do This:</h5>
+                            <ul>
+                                <li>Start with simple bounds (Markov/Chebyshev)</li>
+                                <li>Check independence assumptions carefully</li>
+                                <li>Use for qualitative insights, not precise values</li>
+                                <li>Combine with domain knowledge</li>
+                            </ul>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                            <h5>❌ Avoid This:</h5>
+                            <ul>
+                                <li>Don't trust bounds as exact probabilities</li>
+                                <li>Don't ignore dependence in real data</li>
+                                <li>Don't use wrong tail directions</li>
+                                <li>Don't forget to verify moment conditions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🏆 The Hierarchy Reminder</h4>
+                    <div class="bound-hierarchy">
+                        <div class="bound-item">General<br><small>Loose bounds</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">More assumptions<br><small>Tighter bounds</small></div>
+                        <div class="arrow">→</div>
+                        <div class="bound-item">Specific structure<br><small>Sharp bounds</small></div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Remember:</strong> There's always a trade-off between generality and tightness!</p>
+                </div>
+
+                <div class="simple-example">
+                    <h4>🔗 Connections to Other Chapters</h4>
+                    <ul>
+                        <li><strong>Chapter 6 (Convergence):</strong> Inequalities prove Law of Large Numbers and CLT</li>
+                        <li><strong>Chapter 8 (CDF Estimation):</strong> DKW inequality for empirical CDFs</li>
+                        <li><strong>Chapter 11 (Hypothesis Testing):</strong> Control Type I/II error rates</li>
+                        <li><strong>Chapter 23 (Machine Learning):</strong> Generalization bounds and PAC learning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="#" class="nav-btn">← Chapter 4: Expectation</a>
+            <a href="#" class="nav-btn">Chapter 6: Convergence →</a>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate bound hierarchy on hover
+            const boundItems = document.querySelectorAll('.bound-item');
+            boundItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1) rotate(2deg)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                });
+            });
+
+            // Add click-to-reveal functionality for step-by-step examples
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.style.opacity = index === 0 ? '1' : '0.6';
+                step.addEventListener('click', function() {
+                    steps.forEach(s => s.style.opacity = '0.6');
+                    this.style.opacity = '1';
+                    this.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+
+            // Animate formula boxes on scroll
+            const formulaBoxes = document.querySelectorAll('.formula-box');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'pulse 2s ease-in-out';
+                    }
+                });
+            });
+
+            formulaBoxes.forEach(box => {
+                observer.observe(box);
+            });
+
+            // Add tooltip functionality for mathematical symbols
+            const mathSymbols = document.querySelectorAll('.formula-box');
+            mathSymbols.forEach(box => {
+                box.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                    this.style.boxShadow = '0 12px 25px rgba(102, 126, 234, 0.3)';
+                });
+                box.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '#f39c12';
+                    this.style.boxShadow = '0 8px 20px rgba(243, 156, 18, 0.2)';
+                });
+            });
+
+            // Interactive calculator for simple probability bounds
+            function createInteractiveCalculator() {
+                const calculatorHTML = `
+                    <div class="interactive-calculator" style="
+                        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+                        color: white;
+                        padding: 25px;
+                        border-radius: 15px;
+                        margin: 20px 0;
+                        box-shadow: 0 10px 20px rgba(116, 185, 255, 0.3);
+                    ">
+                        <h4 style="text-align: center; margin-bottom: 20px;">🧮 Interactive Bound Calculator</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px;">Mean (μ):</label>
+                                <input type="number" id="mean-input" value="0" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px;">Standard Deviation (σ):</label>
+                                <input type="number" id="std-input" value="1" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px;">Threshold (k):</label>
+                            <input type="number" id="threshold-input" value="2" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                        </div>
+                        <button onclick="calculateBounds()" style="
+                            width: 100%;
+                            padding: 12px;
+                            background: rgba(255,255,255,0.2);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                        ">Calculate Chebyshev Bound</button>
+                        <div id="calc-result" style="
+                            margin-top: 15px;
+                            padding: 15px;
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 8px;
+                            font-family: 'Courier New', monospace;
+                        "></div>
+                    </div>
+                `;
+                
+                // Insert calculator after the first section
+                const firstSection = document.querySelector('.section');
+                if (firstSection) {
+                    firstSection.insertAdjacentHTML('afterend', calculatorHTML);
+                }
+            }
+
+            // Add the calculator
+            createInteractiveCalculator();
+
+            // Progress indicator for reading
+            function createProgressBar() {
+                const progressBar = document.createElement('div');
+                progressBar.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 0%;
+                    height: 4px;
+                    background: linear-gradient(90deg, #667eea, #764ba2);
+                    z-index: 1000;
+                    transition: width 0.3s ease;
+                `;
+                document.body.appendChild(progressBar);
+
+                window.addEventListener('scroll', () => {
+                    const scrollTop = window.pageYOffset;
+                    const docHeight = document.body.offsetHeight;
+                    const winHeight = window.innerHeight;
+                    const scrollPercent = scrollTop / (docHeight - winHeight);
+                    const scrollPercentRounded = Math.round(scrollPercent * 100);
+                    progressBar.style.width = scrollPercentRounded + '%';
+                });
+            }
+
+            createProgressBar();
+        });
+
+        // Calculator function
+        function calculateBounds() {
+            const mean = parseFloat(document.getElementById('mean-input').value) || 0;
+            const std = parseFloat(document.getElementById('std-input').value) || 1;
+            const k = parseFloat(document.getElementById('threshold-input').value) || 2;
+            
+            const variance = std * std;
+            const threshold = k * std;
+            
+            // Chebyshev bound
+            const chebyshevBound = variance / (threshold * threshold);
+            const probability = Math.max(0, 1 - chebyshevBound);
+            
+            const resultDiv = document.getElementById('calc-result');
+            resultDiv.innerHTML = `
+                <strong>Results for k = ${k} standard deviations:</strong><br>
+                Threshold: μ ± ${threshold.toFixed(2)}<br>
+                Range: [${(mean - threshold).toFixed(2)}, ${(mean + threshold).toFixed(2)}]<br><br>
+                <strong>Chebyshev Bound:</strong><br>
+                P(|X - μ| ≥ ${threshold.toFixed(2)}) ≤ ${chebyshevBound.toFixed(4)}<br>
+                P(|X - μ| < ${threshold.toFixed(2)}) ≥ ${probability.toFixed(4)}<br><br>
+                <em>At least ${(probability * 100).toFixed(1)}% of data within range</em>
+            `;
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Press 'C' to focus on calculator
+            if (e.key.toLowerCase() === 'c' && !e.ctrlKey && !e.metaKey) {
+                const meanInput = document.getElementById('mean-input');
+                if (meanInput) {
+                    meanInput.focus();
+                    e.preventDefault();
+                }
+            }
+            
+            // Press 'T' to scroll to top
+            if (e.key.toLowerCase() === 't' && !e.ctrlKey && !e.metaKey) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                e.preventDefault();
+            }
+        });
+
+        // Add dark mode toggle
+        function addDarkModeToggle() {
+            const toggleButton = document.createElement('button');
+            toggleButton.innerHTML = '🌓';
+            toggleButton.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                border: none;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+                transition: all 0.3s ease;
+            `;
+            
+            let isDark = false;
+            toggleButton.addEventListener('click', () => {
+                isDark = !isDark;
+                if (isDark) {
+                    document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+                    toggleButton.style.filter = 'invert(1) hue-rotate(180deg)';
+                } else {
+                    document.body.style.filter = 'none';
+                    toggleButton.style.filter = 'none';
+                }
+            });
+            
+            document.body.appendChild(toggleButton);
+        }
+
+        // Initialize dark mode toggle
+        document.addEventListener('DOMContentLoaded', addDarkModeToggle);
+    </script>
+</body>
+</html> 
